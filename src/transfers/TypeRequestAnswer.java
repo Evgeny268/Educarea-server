@@ -3,6 +3,7 @@ package transfers;
 public interface TypeRequestAnswer {
     String ERROR = "ERROR";
     String AUTHORIZATION_DONE = "AUTHORIZATION_DONE";
+    String AUTHENTICATION_DONE = "AUTHENTICATION_DONE";
     String AUTHORIZATION_FAILURE = "AUTHORIZATION_FAILURE";
     String USER_NOT_EXIST = "USER_NOT_EXIST";
     String WRONG_PASSWORD = "WRONG_PASSWORD";

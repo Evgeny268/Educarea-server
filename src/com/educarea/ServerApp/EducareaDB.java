@@ -14,5 +14,11 @@ public interface EducareaDB {
 
     int getUserIdByLogin(String login) throws Exception;
 
+    int getUserIdByLogAndPass(String login, String password) throws Exception;
+
+    int getUserIdByAuthToken(String token) throws Exception;
+
     void insertNewUser(User user) throws Exception;
+
+    void insertAuthToken(int userId, String token) throws Exception;
 }
