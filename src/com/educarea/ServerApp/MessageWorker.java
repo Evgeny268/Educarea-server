@@ -53,7 +53,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
             sendError();
             return;
         }
-        if (alreadyCreate==0){
+        if (alreadyCreate!=0){
             sendAnswer(USER_ALREADY_EXIST);
         }else {
             synchronized (lock){
