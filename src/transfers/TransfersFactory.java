@@ -51,6 +51,15 @@ public class TransfersFactory {
                     return null;
                 }
             }
+            else if (node.get("type").asText().equals("."+Authorization.class.getSimpleName())) {
+                try {
+                    Authorization out = objectMapper.readValue(jsonString, Authorization.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
             else {
                 return null;
             }
