@@ -20,6 +20,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
 
     public static final int MIN_TOKEN_LENGTH = 128;
     public static final int MAX_TOKEN_LENGTH = 200;
+    public static final int MAX_TRY_CONNECT_WRONG_TOKEN = 5;
 
     public MessageWorker(WebSocket webSocket, String recivedMessage) {
         this.webSocket = webSocket;
@@ -33,10 +34,23 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
         if (message == null) return;
         if (message instanceof Registration){
             registration((Registration) message);
+        }else if (message instanceof Authentication){
+            authentication((Authentication) message);
+        }else if (message instanceof Authorization){
+            authorization((Authorization) message);
+        }
+        else {
+            sendError();
         }
     }
 
     private void registration(Registration registration){
+
+        if (registration.login == null || registration.password == null){
+            sendError();
+            return;
+        }
+
         if (!checkLogin(registration.login)){
             sendAnswer(BAD_LOGIN);
             return;
@@ -82,6 +96,11 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
     }
 
     private void authentication(Authentication authentication){
+        if (authentication.login == null || authentication.password == null){
+            sendError();
+            return;
+        }
+
         int alreadyCreate = 0;
         try {
             alreadyCreate = AppContext.educareaDB.getUserIdByLogin(authentication.login);
@@ -143,6 +162,46 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
         }
     }
 
+    private void authorization(Authorization authorization){
+        if (authorization.token == null){
+            sendError();
+            return;
+        }
+
+        int userId;
+        try {
+            userId = AppContext.educareaDB.getUserIdByAuthToken(authorization.token);
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendError();
+            return;
+        }
+
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(this.webSocket);
+        if (userId==0){
+            sendAnswer(USER_NOT_EXIST);
+            if (clientInfo == null){
+                sendError();
+                return;
+            }else {
+                if (clientInfo.getAuthTryCount()<MAX_TRY_CONNECT_WRONG_TOKEN){
+                    clientInfo.setAuthTryCount(clientInfo.getAuthTryCount()+1);
+                }else {
+                    webSocket.close();
+                }
+            }
+        }else {
+            try {
+                updateClientInfo(clientInfo, userId, authorization.token, authorization.cloudToken);
+                sendAnswer(AUTHORIZATION_DONE);
+            } catch (Exception e) {
+                e.printStackTrace();
+                sendError();
+            }
+        }
+
+    }
+
     private String objToJson(Object c) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         StringWriter stringWriter = new StringWriter();
@@ -171,6 +230,35 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
             return;
         }
         webSocket.send(out);
+    }
+
+    private void updateClientInfo(ClientInfo clientInfo, int userId, String token, String cloudToken) throws Exception{
+        synchronized (lock) {
+            Savepoint savepoint = null;
+            try {
+                savepoint = AppContext.educareaDB.setSavepoint("update_tokens");
+            } catch (Exception e) {
+                throw e;
+            }
+            try {
+                User user = AppContext.educareaDB.getUserById(userId);
+                AppContext.educareaDB.updateTokenTime(token);
+                AppContext.educareaDB.updateTokenAddress(token, webSocket.getRemoteSocketAddress().getAddress().getHostName());
+                if (cloudToken != null) {
+                    AppContext.educareaDB.updateCloudToken(token, cloudToken);
+                }
+                if (user == null) {
+                    throw new Exception("user is empty");
+                } else {
+                    clientInfo.setLogin(user.login);
+                    clientInfo.setToken(token);
+                    clientInfo.setCloudToken(cloudToken);
+                    AppContext.educareaDB.commit();
+                }
+            } catch (Exception e) {
+                AppContext.educareaDB.rollback(savepoint);
+            }
+        }
     }
 
     public static boolean checkLogin(String login){

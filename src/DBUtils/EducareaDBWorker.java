@@ -95,6 +95,27 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
     }
 
     @Override
+    public User getUserById(int userId) throws Exception {
+        User user = null;
+        try(DBWorker.Builder builder = new Builder(true)
+        .setSql("SELECT login, password FROM user WHERE user_id = ?")
+        .setParameters(String.valueOf(userId))
+        .setTypes("int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                String login = resultSet.getString(1);
+                String password = resultSet.getString(2);
+                user = new User(userId,login,password);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }
+        return user;
+    }
+
+    @Override
     public void insertNewUser(User user) throws Exception {
         try(DBWorker.Builder builder = new Builder(false)
         .setSql("INSERT INTO user (login, password) VALUES (?,?)")
@@ -117,6 +138,49 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
         .setSql("INSERT INTO user_tokens (user_id, auth_token, last_date) VALUES (?,?,?)")
         .setParameters(String.valueOf(userId),token,currentDateTime)
         .setTypes("int","String","String")){
+            builder.build();
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public void updateTokenTime(String token) throws Exception {
+        Date date = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String currentDateTime = format.format(date);
+        try(DBWorker.Builder builder = new Builder(false)
+        .setSql("UPDATE user_tokens SET last_date = ? WHERE auth_token = ?")
+        .setParameters(currentDateTime, token)
+        .setTypes("String","String")){
+            builder.build();
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public void updateTokenAddress(String token, String address) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+                .setSql("UPDATE user_tokens SET id_address = ? WHERE auth_token = ?")
+                .setParameters(address, token)
+                .setTypes("String","String")){
+            builder.build();
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public void updateCloudToken(String token, String cloudToken) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+                .setSql("UPDATE user_tokens SET cloud_token = ? WHERE auth_token = ?")
+                .setParameters(cloudToken, token)
+                .setTypes("String","String")){
             builder.build();
         }catch (Exception e){
             e.printStackTrace();

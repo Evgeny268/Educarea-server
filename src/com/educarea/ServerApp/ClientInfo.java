@@ -5,6 +5,7 @@ public class ClientInfo {
     private String login = null;
     private String token = null;
     private String cloudToken = null;
+    private int authTryCount = 0;//TODO протестировать этот момент
 
     public ClientInfo() {
     }
@@ -41,5 +42,13 @@ public class ClientInfo {
 
     public void setCloudToken(String cloudToken) {
         this.cloudToken = cloudToken;
+    }
+
+    public int getAuthTryCount() {
+        return authTryCount;
+    }
+
+    public void setAuthTryCount(int authTryCount) {
+        this.authTryCount = authTryCount;
     }
 }

@@ -7,8 +7,8 @@ import java.io.Serializable;
 @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, property ="type")
 public class Authentication implements Serializable,Transfers {
 
-    public String login;
-    public String password;
+    public String login = null;
+    public String password = null;
 
     public Authentication() {
     }

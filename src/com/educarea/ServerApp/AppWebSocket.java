@@ -10,7 +10,7 @@ import java.util.HashMap;
 public class AppWebSocket extends WebSocketServer {
     private static final Object lock = new Object();
     private static final int TCP_PORT = 4444;
-    private static HashMap<WebSocket, ClientInfo> clients;
+    private HashMap<WebSocket, ClientInfo> clients;
 
     public AppWebSocket() {
         super(new InetSocketAddress(TCP_PORT));
@@ -49,10 +49,14 @@ public class AppWebSocket extends WebSocketServer {
     }
 
     public HashMap<WebSocket, ClientInfo> getClients(){
-        HashMap returnMap = null;
-        synchronized (lock){
-            returnMap = new HashMap(clients);
+        return clients;
+    }
+
+    public ClientInfo getClientInfo(WebSocket webSocket){
+        ClientInfo clientInfo = null;
+        synchronized (lock) {
+            clientInfo = clients.get(webSocket);
         }
-        return returnMap;
+        return clientInfo;
     }
 }

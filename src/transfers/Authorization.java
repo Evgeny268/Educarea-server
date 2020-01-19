@@ -7,8 +7,8 @@ import java.io.Serializable;
 @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, property ="type")
 public class Authorization implements Serializable, Transfers {
 
-    public String token;
-    public String cloudToken;
+    public String token = null;
+    public String cloudToken = null;
 
     public Authorization() {
     }
