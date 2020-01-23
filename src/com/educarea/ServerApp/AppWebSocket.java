@@ -10,7 +10,7 @@ import java.util.HashMap;
 public class AppWebSocket extends WebSocketServer {
     private static final Object lock = new Object();
     private static final int TCP_PORT = 4444;
-    private HashMap<WebSocket, ClientInfo> clients;
+    private HashMap<WebSocket, ClientInfo> clients;// может лучше ConcurrentHashMap и убрать все synchronized?
 
     public AppWebSocket() {
         super(new InetSocketAddress(TCP_PORT));
@@ -21,6 +21,7 @@ public class AppWebSocket extends WebSocketServer {
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         synchronized (lock){
             clients.put(conn,new ClientInfo());
+            System.out.println("new client");
         }
     }
 
@@ -29,10 +30,12 @@ public class AppWebSocket extends WebSocketServer {
         synchronized (lock){
             clients.remove(conn);
         }
+        System.out.println("close connection. Clients count = "+clients.size());
     }
 
     @Override
     public void onMessage(WebSocket conn, String message) {
+        System.out.println(message);
         MessageWorker messageWorker = new MessageWorker(conn,message);
         Thread thread = new Thread(messageWorker);
         thread.start();

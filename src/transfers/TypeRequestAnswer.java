@@ -13,4 +13,5 @@ public interface TypeRequestAnswer {
     String BAD_PASSWORD = "BAD_PASSWORD";
     String UPDATE_TOKEN = "UPDATE_TOKEN";
     String NEED_LOGIN = "NEED_LOGIN";
+    String LOGOUT = "LOGOUT";
 }

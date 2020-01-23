@@ -82,6 +82,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 try {
                     AppContext.educareaDB.insertNewUser(new User(registration.login,registration.password));
                     AppContext.educareaDB.commit();
+                    sendAnswer(REGISTRATION_DONE);
                 } catch (Exception e) {
                     e.printStackTrace();
                     try {
@@ -179,7 +180,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
 
         ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(this.webSocket);
         if (userId==0){
-            sendAnswer(USER_NOT_EXIST);
+            sendAnswer(LOGOUT);
             if (clientInfo == null){
                 sendError();
                 return;
@@ -286,12 +287,15 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
         }
     }
 
-    private static String generateSafeToken(int size) {
+    public static String generateSafeToken(int size) {
         SecureRandom random = new SecureRandom();
-        byte bytes[] = new byte[size];
-        random.nextBytes(bytes);
-        Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
-        String token = encoder.encodeToString(bytes);
-        return token;
+        final String alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        char []simbol = alphabet.toCharArray();
+        String key = "";
+        for (int i = 0; i < size; i++) {
+            int current = random.nextInt(alphabet.length());
+            key += simbol[current];
+        }
+        return key;
     }
 }

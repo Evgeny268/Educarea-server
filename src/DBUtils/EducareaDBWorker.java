@@ -41,7 +41,7 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
     public int getUserIdByLogin(String login) throws Exception {
         int userId = 0;
         try(DBWorker.Builder builder = new Builder(true)
-        .setSql("SELECT user_id FROM user WHERE login = ?")
+        .setSql("SELECT user_id FROM user WHERE BINARY login = ?")
         .setParameters(login)
         .setTypes("String")){
             builder.build();
@@ -60,7 +60,7 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
     public int getUserIdByLogAndPass(String login, String password) throws Exception {
         int userId = 0;
         try(DBWorker.Builder builder = new Builder(true)
-                .setSql("SELECT user_id FROM user WHERE login = ? and password = ?")
+                .setSql("SELECT user_id FROM user WHERE BINARY login = ? and BINARY password = ?")
                 .setParameters(login, password)
                 .setTypes("String", "String")){
             builder.build();
@@ -79,7 +79,7 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
     public int getUserIdByAuthToken(String token) throws Exception {
         int userId = 0;
         try(DBWorker.Builder builder = new Builder(true)
-                .setSql("SELECT user_id FROM user_tokens WHERE auth_token = ?")
+                .setSql("SELECT user_id FROM user_tokens WHERE BINARY auth_token = ?")
                 .setParameters(token)
                 .setTypes("String")){
             builder.build();
@@ -152,7 +152,7 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         String currentDateTime = format.format(date);
         try(DBWorker.Builder builder = new Builder(false)
-        .setSql("UPDATE user_tokens SET last_date = ? WHERE auth_token = ?")
+        .setSql("UPDATE user_tokens SET last_date = ? WHERE BINARY auth_token = ?")
         .setParameters(currentDateTime, token)
         .setTypes("String","String")){
             builder.build();
@@ -165,7 +165,7 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
     @Override
     public void updateTokenAddress(String token, String address) throws Exception {
         try(DBWorker.Builder builder = new Builder(false)
-                .setSql("UPDATE user_tokens SET id_address = ? WHERE auth_token = ?")
+                .setSql("UPDATE user_tokens SET ip_address = ? WHERE BINARY auth_token = ?")
                 .setParameters(address, token)
                 .setTypes("String","String")){
             builder.build();
@@ -178,7 +178,7 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
     @Override
     public void updateCloudToken(String token, String cloudToken) throws Exception {
         try(DBWorker.Builder builder = new Builder(false)
-                .setSql("UPDATE user_tokens SET cloud_token = ? WHERE auth_token = ?")
+                .setSql("UPDATE user_tokens SET cloud_token = ? WHERE BINARY auth_token = ?")
                 .setParameters(cloudToken, token)
                 .setTypes("String","String")){
             builder.build();
