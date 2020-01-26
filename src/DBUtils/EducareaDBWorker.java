@@ -1,11 +1,15 @@
 package DBUtils;
 
 import com.educarea.ServerApp.EducareaDB;
+import transfers.Group;
+import transfers.GroupPerson;
 import transfers.User;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -54,6 +58,92 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
             throw e;
         }
         return userId;
+    }
+
+    @Override
+    public int getGroupIdByName(String name) throws Exception {
+        int groupId = 0;
+        try(DBWorker.Builder builder = new Builder(true)
+                .setSql("SELECT group_id FROM educarea.group WHERE BINARY name = ?")
+                .setParameters(name)
+                .setTypes("String")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                groupId = resultSet.getInt(1);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }
+        return groupId;
+    }
+
+    @Override
+    public ArrayList<Integer> getGroupsIdByUserId(int userId) throws Exception {
+        ArrayList<Integer> groupsId = new ArrayList<>();
+        try(DBWorker.Builder builder = new Builder(true)
+        .setSql("SELECT group_id FROM group_person WHERE user_id = ?")
+        .setParameters(String.valueOf(userId))
+        .setTypes("int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                groupsId.add(resultSet.getInt(1));
+            }
+        }catch (Exception e){
+            throw e;
+        }
+        return groupsId;
+    }
+
+    @Override
+    public Group getGroupById(int groupId) throws Exception {
+        Group group = null;
+        try(DBWorker.Builder builder = new Builder(true)
+        .setSql("SELECT * from educarea.group WHERE group_id = ?")
+        .setParameters(String.valueOf(groupId))
+        .setTypes("int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                int id = resultSet.getInt(1);
+                String name = resultSet.getString(2);
+                Date date = resultSet.getDate(3);
+                group = new Group(id,name,date);
+            }
+        }catch (Exception e){
+            throw e;
+        }
+        return group;
+    }
+
+    @Override
+    public ArrayList<GroupPerson> getGroupPersonsByUserId(int userId) throws Exception {
+        ArrayList<GroupPerson> people = new ArrayList<>();
+        try(DBWorker.Builder builder = new Builder(true)
+        .setSql("SELECT * FROM group_person WHERE user_id = ?")
+        .setParameters(String.valueOf(userId))
+        .setTypes("int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                int groupPersonId = resultSet.getInt(1);
+                int groupId = resultSet.getInt(2);
+                userId = resultSet.getInt(3);
+                int personType = resultSet.getInt(4);
+                int moderator = resultSet.getInt(5);
+                String surname = resultSet.getString(6);
+                String name = resultSet.getString(7);
+                String patronymic = resultSet.getString(8);
+                GroupPerson groupPerson = new GroupPerson(groupPersonId, groupId,userId,personType,moderator);
+                groupPerson.surname = surname;
+                groupPerson.name = name;
+                groupPerson.patronymic = patronymic;
+                people.add(groupPerson);
+            }
+        }
+        return people;
     }
 
     @Override
@@ -124,6 +214,38 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
             builder.build();
         }catch (Exception e){
             e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public void insertNewGroup(String name) throws Exception {
+        Date date = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String currentDateTime = format.format(date);
+        try(DBWorker.Builder builder = new Builder(false)
+        .setSql("INSERT INTO educarea.group (name, create_date) VALUES (?,?)")
+        .setParameters(name,currentDateTime)
+        .setTypes("String","String")){
+            builder.build();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public void insertGroupPerson(GroupPerson groupPerson) throws Exception {
+        if ((groupPerson.personType<0 || groupPerson.personType>1) || (groupPerson.moderator<0 || groupPerson.moderator>1)){
+            throw new SQLException("personType or moderator incorrect value!");
+        }
+        try(DBWorker.Builder builder = new Builder(false)
+        .setSql("INSERT INTO group_person (group_id, user_id, person_type, is_moderator, surname, name, patronymic) VALUES (?,?,?,?,?,?,?)")
+        .setParameters(String.valueOf(groupPerson.groupId),String.valueOf(groupPerson.userId),String.valueOf(groupPerson.personType),
+                String.valueOf(groupPerson.moderator), groupPerson.surname,groupPerson.name,groupPerson.patronymic)
+        .setTypes("int","int","int","int","String","String","String")){
+            builder.build();
+        }catch (Exception e){
             throw e;
         }
     }

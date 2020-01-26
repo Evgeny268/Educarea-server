@@ -20,6 +20,12 @@ public class TransferRequestAnswer implements Transfers {
         this.extra = extra;
     }
 
+    public TransferRequestAnswer(String request, String extra, String... extraArr) {
+        this.request = request;
+        this.extra = extra;
+        this.extraArr = extraArr;
+    }
+
     public String getRequest() {
         return request;
     }

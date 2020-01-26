@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.security.SecureRandom;
 import java.sql.Savepoint;
-import java.util.Base64;
+import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -38,6 +38,17 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
             authentication((Authentication) message);
         }else if (message instanceof Authorization){
             authorization((Authorization) message);
+        }
+        else if (message instanceof TransferRequestAnswer){
+            if (((TransferRequestAnswer) message).request==null){
+                sendError();
+                return;
+            }
+            if (((TransferRequestAnswer) message).request.equals(CREATE_GROUP)){
+                createGroup((TransferRequestAnswer) message);
+            }else if (((TransferRequestAnswer) message).request.equals(GET_MY_GROUPS)){
+                getMyGroup();
+            }
         }
         else {
             sendError();
@@ -194,13 +205,96 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
         }else {
             try {
                 updateClientInfo(clientInfo, userId, authorization.token, authorization.cloudToken);
-                sendAnswer(AUTHORIZATION_DONE);
+                TransferRequestAnswer out = new TransferRequestAnswer(AUTHORIZATION_DONE,String.valueOf(userId),clientInfo.getLogin());
+                sendTransfers(out);
             } catch (Exception e) {
                 e.printStackTrace();
                 sendError();
             }
         }
 
+    }
+
+    private void createGroup(TransferRequestAnswer transferRequestAnswer){
+        String groupName = transferRequestAnswer.extra;
+        if (groupName==null){
+            sendError();
+            return;
+        }
+        if (groupName.equals("")){
+            sendError();
+            return;
+        }
+
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            int alreadyGroupCreate = 0;
+            try {
+                alreadyGroupCreate = AppContext.educareaDB.getGroupIdByName(groupName);
+            } catch (Exception e) {
+                e.printStackTrace();
+                sendError();
+                return;
+            }
+            if (alreadyGroupCreate != 0) {
+                sendAnswer(GROUP_ALREADY_EXIST);
+            }else {
+                synchronized (lock){
+                    Savepoint savepoint = null;
+                    try {
+                        savepoint = AppContext.educareaDB.setSavepoint("create_group");
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        sendError();
+                        return;
+                    }
+                    try {
+                        AppContext.educareaDB.insertNewGroup(groupName);
+                        int groupId = AppContext.educareaDB.getGroupIdByName(groupName);
+                        GroupPerson groupPerson = new GroupPerson(groupId, userId, 1);
+                        AppContext.educareaDB.insertGroupPerson(groupPerson);
+                        AppContext.educareaDB.commit();
+                        sendAnswer(GROUP_ADDED);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        try {
+                            AppContext.educareaDB.rollback(savepoint);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                        sendError();
+                    }
+                }
+            }
+        }
+    }
+
+    private void getMyGroup(){
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            try {
+                ArrayList<Integer> groupsId = AppContext.educareaDB.getGroupsIdByUserId(userId);
+                ArrayList<Group> groups = new ArrayList<>();
+                for (int i = 0; i < groupsId.size(); i++) {
+                    groups.add(AppContext.educareaDB.getGroupById(groupsId.get(i)));
+                }
+                ArrayList<GroupPerson> groupPeople = AppContext.educareaDB.getGroupPersonsByUserId(userId);
+                UserGroups userGroups = new UserGroups();
+                for (int i = 0; i < groups.size(); i++) {
+                    for (int j = 0; j < groupPeople.size(); j++) {
+                        if (groups.get(i).groupId == groupPeople.get(j).groupId) {
+                            userGroups.add(groups.get(i), groupPeople.get(j));
+                        }
+                    }
+                }
+                sendTransfers(userGroups);
+            }catch (Exception e){
+                e.printStackTrace();
+                sendError();
+            }
+        }
     }
 
     private String objToJson(Object c) throws IOException {
@@ -266,6 +360,41 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
         if (login.length()==0) return false;
         if (login.length()>30) return false;
         return login.matches("\\w+");
+    }
+
+    private boolean connectBrutforseCheck(ClientInfo clientInfo){
+        sendAnswer(LOGOUT);
+        if (clientInfo == null){
+            sendError();
+            return false;
+        }else {
+            if (clientInfo.getAuthTryCount()<MAX_TRY_CONNECT_WRONG_TOKEN){
+                clientInfo.setAuthTryCount(clientInfo.getAuthTryCount()+1);
+                return false;
+            }else {
+                webSocket.close();
+                return true;
+            }
+        }
+    }
+
+    private int checkAuthorizationGetUserId(ClientInfo clientInfo){
+        if (clientInfo.getToken()==null){
+            sendAnswer(AUTHORIZATION_FAILURE);
+            return 0;
+        }
+        int userId = 0;
+        try {
+            userId = AppContext.educareaDB.getUserIdByAuthToken(clientInfo.getToken());
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendError();
+            return 0;
+        }
+        if (userId==0){
+            connectBrutforseCheck(clientInfo);
+            return 0;
+        }else return userId;
     }
 
     public static boolean checkPassword(String password){

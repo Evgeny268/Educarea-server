@@ -60,6 +60,33 @@ public class TransfersFactory {
                     return null;
                 }
             }
+            else if (node.get("type").asText().equals("."+GroupPerson.class.getSimpleName())) {
+                try {
+                    GroupPerson out = objectMapper.readValue(jsonString, GroupPerson.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+            else if (node.get("type").asText().equals("."+Group.class.getSimpleName())) {
+                try {
+                    Group out = objectMapper.readValue(jsonString, Group.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+            else if (node.get("type").asText().equals("."+UserGroups.class.getSimpleName())) {
+                try {
+                    UserGroups out = objectMapper.readValue(jsonString, UserGroups.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
             else {
                 return null;
             }
