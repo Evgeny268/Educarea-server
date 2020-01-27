@@ -340,26 +340,21 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
 
     @Override
     public void updateGroupPersonUserId(int groupPersonId, int userId) throws Exception {
+        String []params = new String[2];
         if (userId == 0){
-            try(DBWorker.Builder builder = new Builder(false)
-                    .setSql("UPDATE group_person SET user_id = ? WHERE group_person_id = ?")
-                    .setParameters(null, String.valueOf(groupPersonId))
-                    .setTypes("int","int")){
-                builder.build();
-            }catch (Exception e){
-                e.printStackTrace();
-                throw e;
-            }
+            params[0] = null;
         }else {
-            try(DBWorker.Builder builder = new Builder(false)
-                    .setSql("UPDATE group_person SET user_id = ? WHERE group_person_id = ?")
-                    .setParameters(String.valueOf(userId), String.valueOf(groupPersonId))
-                    .setTypes("int","int")){
-                builder.build();
-            }catch (Exception e){
-                e.printStackTrace();
-                throw e;
-            }
+            params[0] = String.valueOf(userId);
+        }
+        params[1] = String.valueOf(groupPersonId);
+        try(DBWorker.Builder builder = new Builder(false)
+                .setSql("UPDATE group_person SET user_id = ? WHERE group_person_id = ?")
+                .setParameters(params)
+                .setTypes("int","int")){
+            builder.build();
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e;
         }
     }
 }
