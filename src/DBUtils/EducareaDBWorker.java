@@ -147,6 +147,34 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
     }
 
     @Override
+    public ArrayList<GroupPerson> getGroupPersonsByGroupId(int groupId) throws Exception {
+        ArrayList<GroupPerson> people = new ArrayList<>();
+        try(DBWorker.Builder builder = new Builder(true)
+                .setSql("SELECT * FROM group_person WHERE group_id = ?")
+                .setParameters(String.valueOf(groupId))
+                .setTypes("int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                int groupPersonId = resultSet.getInt(1);
+                groupId = resultSet.getInt(2);
+                int userId = resultSet.getInt(3);
+                int personType = resultSet.getInt(4);
+                int moderator = resultSet.getInt(5);
+                String surname = resultSet.getString(6);
+                String name = resultSet.getString(7);
+                String patronymic = resultSet.getString(8);
+                GroupPerson groupPerson = new GroupPerson(groupPersonId, groupId,userId,personType,moderator);
+                groupPerson.surname = surname;
+                groupPerson.name = name;
+                groupPerson.patronymic = patronymic;
+                people.add(groupPerson);
+            }
+        }
+        return people;
+    }
+
+    @Override
     public int getUserIdByLogAndPass(String login, String password) throws Exception {
         int userId = 0;
         try(DBWorker.Builder builder = new Builder(true)
@@ -307,6 +335,31 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
         }catch (Exception e){
             e.printStackTrace();
             throw e;
+        }
+    }
+
+    @Override
+    public void updateGroupPersonUserId(int groupPersonId, int userId) throws Exception {
+        if (userId == 0){
+            try(DBWorker.Builder builder = new Builder(false)
+                    .setSql("UPDATE group_person SET user_id = ? WHERE group_person_id = ?")
+                    .setParameters(null, String.valueOf(groupPersonId))
+                    .setTypes("int","int")){
+                builder.build();
+            }catch (Exception e){
+                e.printStackTrace();
+                throw e;
+            }
+        }else {
+            try(DBWorker.Builder builder = new Builder(false)
+                    .setSql("UPDATE group_person SET user_id = ? WHERE group_person_id = ?")
+                    .setParameters(String.valueOf(userId), String.valueOf(groupPersonId))
+                    .setTypes("int","int")){
+                builder.build();
+            }catch (Exception e){
+                e.printStackTrace();
+                throw e;
+            }
         }
     }
 }

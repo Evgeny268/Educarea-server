@@ -25,6 +25,10 @@ public interface EducareaDB {
 
     ArrayList<GroupPerson> getGroupPersonsByUserId(int userId) throws Exception;
 
+    ArrayList<GroupPerson> getGroupPersonsByGroupId(int groupId) throws Exception;
+
+    void updateGroupPersonUserId(int groupPersonId, int userId) throws Exception;
+
     int getUserIdByLogAndPass(String login, String password) throws Exception;
 
     int getUserIdByAuthToken(String token) throws Exception;

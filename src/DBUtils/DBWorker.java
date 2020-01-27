@@ -106,11 +106,21 @@ public class DBWorker {
             pstmt = connection.prepareStatement(sql);
             for (int i = 0; i < parameters.length; i++) {
                 switch (types[i]){
-                    case "int":
-                        pstmt.setInt(i+1,Integer.parseInt(parameters[i]));
+                    case "int": {
+                        if (parameters[i]==null){
+                            pstmt.setNull(i+1,Types.INTEGER);
+                        }else {
+                            pstmt.setInt(i + 1, Integer.parseInt(parameters[i]));
+                        }
+                    }
                         break;
-                    case "String":
-                        pstmt.setString(i+1,parameters[i]);
+                    case "String": {
+                        if (parameters[i]==null) {
+                            pstmt.setNull(i+1,Types.VARCHAR);
+                        }else {
+                            pstmt.setString(i + 1, parameters[i]);
+                        }
+                    }
                         break;
                     default:
                         throw new SQLException("Undefined type");

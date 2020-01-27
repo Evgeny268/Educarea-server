@@ -48,6 +48,8 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 createGroup((TransferRequestAnswer) message);
             }else if (((TransferRequestAnswer) message).request.equals(GET_MY_GROUPS)){
                 getMyGroup();
+            }else if (((TransferRequestAnswer) message).request.equals(LEAVE_GROUP)){
+                leaveGroup((TransferRequestAnswer) message);
             }
         }
         else {
@@ -294,6 +296,73 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 e.printStackTrace();
                 sendError();
             }
+        }else {
+            sendError();
+        }
+    }
+
+    private void leaveGroup(TransferRequestAnswer transferRequestAnswer){
+        int groupId = 0;
+        try {
+            groupId = Integer.valueOf(transferRequestAnswer.extra);
+        }catch (Exception e){
+            e.printStackTrace();
+            sendError();
+            return;
+        }
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            ArrayList<GroupPerson> groupPeople = null;
+            try {
+                groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(groupId);
+            }catch (Exception e){
+                e.printStackTrace();
+                return;
+            }
+            boolean userIsModerator = false;
+            int moderatorCount = 0;
+            int groupPersonId = 0;
+            for (int i = 0; i < groupPeople.size(); i++) {
+                if (groupPeople.get(i).moderator==1){
+                    moderatorCount++;
+                    if (userId==groupPeople.get(i).userId){
+                        userIsModerator=true;
+                    }
+                }
+                if (userId==groupPeople.get(i).userId){
+                    groupPersonId = groupPeople.get(i).groupPersonId;
+                }
+            }
+            if (userIsModerator && moderatorCount==1){
+                sendAnswer(YOU_ONLY_MODERATOR);
+            }else {
+                synchronized (lock){
+                    Savepoint savepoint = null;
+                    try {
+                        savepoint = AppContext.educareaDB.setSavepoint("leave_group");
+                    }catch (Exception e){
+                        sendError();
+                        return;
+                    }
+                    try {
+                        AppContext.educareaDB.updateGroupPersonUserId(groupPersonId, 0);
+                        AppContext.educareaDB.commit();
+                        sendAnswer(UPDATE_INFO);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        sendError();
+                        try {
+                            AppContext.educareaDB.rollback(savepoint);
+                        }catch (Exception e1){
+                        }
+                        return;
+                    }
+
+                }
+            }
+        }else {
+            sendError();
         }
     }
 

@@ -18,4 +18,7 @@ public interface TypeRequestAnswer {
     String GROUP_ALREADY_EXIST = "GROUP_ALREADY_EXIST";
     String GET_MY_GROUPS = "GET_MY_GROUPS";
     String GROUP_ADDED = "GROUP_ADDED";
+    String LEAVE_GROUP = "LEAVE_GROUP";
+    String UPDATE_INFO = "UPDATE_INFO";
+    String YOU_ONLY_MODERATOR = "YOU_ONLY_MODERATOR";
 }
