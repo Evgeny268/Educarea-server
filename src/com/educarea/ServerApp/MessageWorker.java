@@ -50,6 +50,30 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 getMyGroup();
             }else if (((TransferRequestAnswer) message).request.equals(LEAVE_GROUP)){
                 leaveGroup((TransferRequestAnswer) message);
+            }else if (((TransferRequestAnswer) message).request.equals(GET_GROUP_PERSONS)){
+                getGroupPersons((TransferRequestAnswer) message);
+            }else if (((TransferRequestAnswer) message).request.equals(CREATE_PERSON)){
+                Transfers in = TransfersFactory.createFromJSON(((TransferRequestAnswer) message).extra);
+                if (in instanceof GroupPerson){
+                    createGroupPerson((GroupPerson) in);
+                }else sendError();
+            }else if (((TransferRequestAnswer) message).request.equals(UPDATE_PERSON)){
+                Transfers in = TransfersFactory.createFromJSON(((TransferRequestAnswer) message).extra);
+                if (in instanceof GroupPerson){
+                    updateGroupPerson((GroupPerson) in);
+                }else sendError();
+            }else if (((TransferRequestAnswer) message).request.equals(INVITE_USER_TO_PERSON)){
+                inviteUser((TransferRequestAnswer) message);
+            }else if (((TransferRequestAnswer) message).request.equals(ACCEPT_INVITE)){
+                acceptInvite((TransferRequestAnswer) message);
+            }else if (((TransferRequestAnswer) message).request.equals(REJECT_INVITE)){
+                rejectInvite((TransferRequestAnswer) message);
+            }else if (((TransferRequestAnswer) message).request.equals(UNTIE_USER)){
+                untieUser((TransferRequestAnswer) message);
+            }else if (((TransferRequestAnswer) message).request.equals(GET_INVITES)){
+                getInvites();
+            }else if (((TransferRequestAnswer) message).request.equals(GET_PERSON_INVITES)){
+                getPersonInvites((TransferRequestAnswer) message);
             }
         }
         else {
@@ -324,7 +348,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
             int moderatorCount = 0;
             int groupPersonId = 0;
             for (int i = 0; i < groupPeople.size(); i++) {
-                if (groupPeople.get(i).moderator==1){
+                if (groupPeople.get(i).moderator==1 && groupPeople.get(i).userId!=0){
                     moderatorCount++;
                     if (userId==groupPeople.get(i).userId){
                         userIsModerator=true;
@@ -334,7 +358,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                     groupPersonId = groupPeople.get(i).groupPersonId;
                 }
             }
-            if (userIsModerator && moderatorCount==1){
+            if (userIsModerator && moderatorCount<=1){
                 sendAnswer(YOU_ONLY_MODERATOR);
             }else {
                 synchronized (lock){
@@ -361,8 +385,444 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
 
                 }
             }
-        }else {
+        }
+    }
+
+    private void getGroupPersons(TransferRequestAnswer transferRequestAnswer){
+        int groupId = 0;
+        try {
+            groupId = Integer.parseInt(transferRequestAnswer.extra);
+        }catch (Exception e){
+            e.printStackTrace();
             sendError();
+            return;
+        }
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId !=0){
+            ArrayList<GroupPerson> groupPeople = null;
+            try {
+                groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(groupId);
+            }catch (Exception e){
+                e.printStackTrace();
+                return;
+            }
+            if (userInGroup(userId, groupPeople)){
+                if (!userIsModerator(userId, groupPeople)){
+                    deleteUserIdInfo(userId,groupPeople);
+                }
+                GroupPersons out = new GroupPersons(groupPeople);
+                sendTransfers(out);
+            }else {
+                sendAnswer(NO_PERMISSION);
+            }
+        }
+    }
+
+    private void createGroupPerson(GroupPerson groupPerson){
+        int groupId = groupPerson.groupId;
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId != 0){
+            synchronized (lock) {
+                ArrayList<GroupPerson> groupPeople = null;
+                try {
+                    groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(groupId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    sendError();
+                    return;
+                }
+                if (userInGroup(userId, groupPeople)) {
+                    if (userIsModerator(userId, groupPeople)) {
+                        if (checkNewGroupPesron(groupPerson)) {
+                            Savepoint savepoint = null;
+                            try {
+                                savepoint = AppContext.educareaDB.setSavepoint("new_groupPerson");
+                            }catch (Exception e){
+                                e.printStackTrace();
+                                sendError();
+                                return;
+                            }
+                            try {
+                                groupPerson.userId=0;
+                                AppContext.educareaDB.insertGroupPerson(groupPerson);
+                                AppContext.educareaDB.commit();
+                                sendAnswer(UPDATE_INFO);
+                            }catch (Exception e){
+                                e.printStackTrace();
+                                try {
+                                    AppContext.educareaDB.rollback(savepoint);
+                                }catch (Exception ex){
+                                    ex.printStackTrace();
+                                }
+                                sendError();
+                                return;
+                            }
+                        } else {
+                            sendError();
+                        }
+                    } else {
+                        sendAnswer(NO_PERMISSION);
+                    }
+                } else {
+                    sendAnswer(NO_PERMISSION);
+                }
+            }
+        }
+    }
+
+    private void updateGroupPerson(GroupPerson groupPerson){
+        int groupId = groupPerson.groupId;
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            synchronized (lock){
+                ArrayList<GroupPerson> groupPeople = null;
+                try {
+                    groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(groupId);
+                    GroupPerson oldGroupPerson = AppContext.educareaDB.getGroupPersonById(groupPerson.groupPersonId);
+                    groupPerson.userId = oldGroupPerson.userId;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    sendError();
+                    return;
+                }
+                if (userInGroup(userId, groupPeople) && personInGroup(groupPerson.groupPersonId, groupPeople)){
+                    if (userIsModerator(userId, groupPeople)){
+                        if (checkNewGroupPesron(groupPerson)) {
+                            Savepoint savepoint = null;
+                            try {
+                                savepoint = AppContext.educareaDB.setSavepoint("update_groupPerson");
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                sendError();
+                                return;
+                            }
+                            try {
+                                AppContext.educareaDB.updateGroupPerson(groupPerson.groupPersonId, groupPerson);
+                                AppContext.educareaDB.commit();
+                                sendAnswer(UPDATE_INFO);
+                            }catch (Exception e){
+                                e.printStackTrace();
+                                try {
+                                    AppContext.educareaDB.rollback(savepoint);
+                                }catch (Exception ex){
+                                    ex.printStackTrace();
+                                }
+                                sendError();
+                                return;
+                            }
+                        } else sendError();
+                    } else sendAnswer(NO_PERMISSION);
+                } else sendAnswer(NO_PERMISSION);
+            }
+        }
+    }
+
+    private void getInvites(){
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        try {
+            if (userId != 0) {
+                ArrayList<MyInvite> myInvites = new ArrayList<>();
+                ArrayList<GroupPersonInvite> invites;
+                invites = AppContext.educareaDB.getPersonInviteByUserId(userId);
+                for (int i = 0; i < invites.size(); i++) {
+                    GroupPerson groupPerson = AppContext.educareaDB.getGroupPersonById(invites.get(i).groupPersonId);
+                    Group group = AppContext.educareaDB.getGroupById(groupPerson.groupId);
+                    MyInvite myInvite = new MyInvite(invites.get(i).groupPersonInviteId, group.name, groupPerson);
+                    myInvites.add(myInvite);
+                }
+                MyInvites out = new MyInvites(myInvites);
+                sendTransfers(out);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            sendError();
+        }
+    }
+
+    private void acceptInvite(TransferRequestAnswer transferRequestAnswer){
+        int inviteId = 0;
+        try {
+            inviteId = Integer.parseInt(transferRequestAnswer.extra);
+        }catch (Exception e){
+            e.printStackTrace();
+            sendError();
+            return;
+        }
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            synchronized (lock) {
+                Savepoint savepoint = null;
+                try {
+                    savepoint = AppContext.educareaDB.setSavepoint("acceptInvite");
+                }catch (Exception e){
+                    e.printStackTrace();
+                    sendError();
+                    return;
+                }
+                try {
+                    GroupPersonInvite invite = AppContext.educareaDB.getGroupPersonInviteById(inviteId);
+                    if (userId == invite.userId) {
+                        int groupPersonId = invite.groupPersonId;
+                        GroupPerson groupPerson = AppContext.educareaDB.getGroupPersonById(groupPersonId);
+                        AppContext.educareaDB.removeGroupPersonInvite(inviteId);
+                        groupPerson.userId = userId;
+                        AppContext.educareaDB.updateGroupPerson(groupPersonId, groupPerson);
+                        AppContext.educareaDB.commit();
+                        sendAnswer(UPDATE_INFO);
+                    } else {
+                        sendError();
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                    try {
+                        AppContext.educareaDB.rollback(savepoint);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                    sendError();
+                }
+            }
+        }
+    }
+
+    private void rejectInvite(TransferRequestAnswer transferRequestAnswer){
+        int inviteId = 0;
+        try {
+            inviteId = Integer.parseInt(transferRequestAnswer.extra);
+        }catch (Exception e){
+            e.printStackTrace();
+            sendError();
+            return;
+        }
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            synchronized (lock) {
+                Savepoint savepoint = null;
+                try {
+                    savepoint = AppContext.educareaDB.setSavepoint("rejectInvite");
+                }catch (Exception e){
+                    e.printStackTrace();
+                    sendError();
+                    return;
+                }
+                try {
+                    GroupPersonInvite invite = AppContext.educareaDB.getGroupPersonInviteById(inviteId);
+                    if (userId == invite.userId) {
+                        AppContext.educareaDB.removeGroupPersonInvite(inviteId);
+                        AppContext.educareaDB.commit();
+                        sendAnswer(UPDATE_INFO);
+                    } else {
+                        sendError();
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                    try {
+                        AppContext.educareaDB.rollback(savepoint);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                    sendError();
+                }
+            }
+        }
+    }
+
+    private void inviteUser(TransferRequestAnswer transferRequestAnswer){
+        int groupPersonId = Integer.parseInt(transferRequestAnswer.extra);;
+        String login = transferRequestAnswer.extraArr[0];
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            synchronized (lock) {
+                try {
+                    GroupPerson invitePerson = AppContext.educareaDB.getGroupPersonById(groupPersonId);
+                    if (invitePerson.userId!=0){
+                        sendError();
+                        return;
+                    }
+                    ArrayList<GroupPerson> groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(invitePerson.groupId);
+                    if (userInGroup(userId, groupPeople)) {
+                        if (userIsModerator(userId, groupPeople)) {
+                            int inviteUserId = AppContext.educareaDB.getUserIdByLogin(login);
+                            if (inviteUserId == 0) {
+                                sendAnswer(USER_NOT_EXIST);
+                            } else {
+                                GroupPersonInvite invite = new GroupPersonInvite(groupPersonId, inviteUserId);
+                                Savepoint savepoint = null;
+                                try {
+                                    savepoint = AppContext.educareaDB.setSavepoint("inviteUser");
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    sendError();
+                                    return;
+                                }
+                                try {
+                                    AppContext.educareaDB.insertPersonInvite(invite);
+                                    AppContext.educareaDB.commit();
+                                    sendAnswer(UPDATE_INFO);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    try {
+                                        AppContext.educareaDB.rollback(savepoint);
+                                    } catch (Exception ex) {
+                                        ex.printStackTrace();
+                                    }
+                                    sendError();
+                                }
+                            }
+                        } else sendAnswer(NO_PERMISSION);
+                    } else sendAnswer(NO_PERMISSION);
+                }catch (Exception e){
+                    e.printStackTrace();
+                    sendError();
+                }
+            }
+        }
+    }
+
+    private void untieUser(TransferRequestAnswer transferRequestAnswer){
+        int groupPersonId = Integer.parseInt(transferRequestAnswer.extra);
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            synchronized (lock) {
+                try {
+                    GroupPerson groupPerson = AppContext.educareaDB.getGroupPersonById(groupPersonId);
+                    ArrayList<GroupPerson> groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(groupPerson.groupId);
+                    if (userInGroup(userId, groupPeople)) {
+                        if (userIsModerator(userId, groupPeople)) {
+                            if (userId==groupPerson.userId){
+                                if (lifeModeratorCount(groupPeople)==1){
+                                    sendError();
+                                    return;
+                                }
+                            }
+                            groupPerson.userId = 0;
+                            Savepoint savepoint = null;
+                            try {
+                                savepoint = AppContext.educareaDB.setSavepoint("inviteUser");
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                sendError();
+                                return;
+                            }
+                            try {
+                                AppContext.educareaDB.updateGroupPerson(groupPerson.groupPersonId, groupPerson);
+                                AppContext.educareaDB.removeGroupPersonInviteByPersonId(groupPerson.groupPersonId);
+                                AppContext.educareaDB.commit();
+                                sendAnswer(UPDATE_INFO);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                try {
+                                    AppContext.educareaDB.rollback(savepoint);
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                                sendError();
+                            }
+                        } else sendAnswer(NO_PERMISSION);
+                    } else sendAnswer(NO_PERMISSION);
+                }catch (Exception e){
+                    e.printStackTrace();
+                    sendError();
+                }
+            }
+        }
+    }
+
+    private void getPersonInvites(TransferRequestAnswer transferRequestAnswer){
+        int groupPersonId = Integer.parseInt(transferRequestAnswer.extra);
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            try {
+                GroupPerson groupPerson = AppContext.educareaDB.getGroupPersonById(groupPersonId);
+                ArrayList<GroupPerson> groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(groupPerson.groupId);
+                if (userInGroup(userId, groupPeople)) {
+                    if (userIsModerator(userId, groupPeople)) {
+                        GroupPersonInvite groupPersonInvite = AppContext.educareaDB.getPersonInviteByPersonId(groupPersonId);
+                        sendTransfers(groupPersonInvite);
+                    } else sendAnswer(NO_PERMISSION);
+                } else sendAnswer(NO_PERMISSION);
+            }catch (Exception e){
+                e.printStackTrace();
+                sendError();
+                return;
+            }
+        }
+    }
+
+    private boolean checkNewGroupPesron(GroupPerson groupPerson){
+        if (groupPerson.personType<0 || groupPerson.personType>1) return false;
+        if (groupPerson.moderator<0 || groupPerson.moderator>1) return false;
+        if (groupPerson.surname!=null){
+            if (groupPerson.surname.equals("")){
+                groupPerson.surname = null;
+            }
+        }
+        if (groupPerson.name!=null){
+            if (groupPerson.name.equals("")){
+                groupPerson.name = null;
+            }
+        }
+        if (groupPerson.patronymic!=null){
+            if (groupPerson.patronymic.equals("")){
+                groupPerson.patronymic = null;
+            }
+        }
+        return true;
+    }
+
+    private boolean userInGroup(int userId, ArrayList<GroupPerson> groupPeople){
+        for (int i = 0; i < groupPeople.size(); i++) {
+            if (userId == groupPeople.get(i).userId){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean personInGroup(int groupPersonId, ArrayList<GroupPerson> groupPeople){
+        for (int i = 0; i < groupPeople.size(); i++) {
+            if (groupPersonId == groupPeople.get(i).groupPersonId){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean userIsModerator(int userId, ArrayList<GroupPerson> groupPeople){
+        for (int i = 0; i < groupPeople.size(); i++) {
+            if (userId == groupPeople.get(i).userId){
+                if (groupPeople.get(i).moderator == 1){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private int lifeModeratorCount(ArrayList<GroupPerson> groupPeople){
+        int count = 0;
+        for (int i = 0; i < groupPeople.size(); i++) {
+            if (groupPeople.get(i).userId!=0 && groupPeople.get(i).moderator==1){
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private void deleteUserIdInfo(int userId, ArrayList<GroupPerson> groupPeople){
+        for (int i = 0; i < groupPeople.size(); i++) {
+            if (userId!=groupPeople.get(i).userId){
+                groupPeople.get(i).userId = 0;
+            }
         }
     }
 

@@ -87,6 +87,42 @@ public class TransfersFactory {
                     return null;
                 }
             }
+            else if (node.get("type").asText().equals("."+GroupPersons.class.getSimpleName())) {
+                try {
+                    GroupPersons out = objectMapper.readValue(jsonString, GroupPersons.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+            else if (node.get("type").asText().equals("."+GroupPersonInvite.class.getSimpleName())) {
+                try {
+                    GroupPersonInvite out = objectMapper.readValue(jsonString, GroupPersonInvite.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+            else if (node.get("type").asText().equals("."+MyInvite.class.getSimpleName())) {
+                try {
+                    MyInvite out = objectMapper.readValue(jsonString, MyInvite.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+            else if (node.get("type").asText().equals("."+MyInvites.class.getSimpleName())) {
+                try {
+                    MyInvites out = objectMapper.readValue(jsonString, MyInvites.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
             else {
                 return null;
             }

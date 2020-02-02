@@ -2,6 +2,7 @@ package com.educarea.ServerApp;
 
 import transfers.Group;
 import transfers.GroupPerson;
+import transfers.GroupPersonInvite;
 import transfers.User;
 
 import java.sql.Savepoint;
@@ -22,6 +23,8 @@ public interface EducareaDB {
     Group getGroupById(int groupId) throws Exception;
 
     ArrayList<Integer> getGroupsIdByUserId(int userId) throws Exception;
+
+    GroupPerson getGroupPersonById (int groupPersonId) throws Exception;
 
     ArrayList<GroupPerson> getGroupPersonsByUserId(int userId) throws Exception;
 
@@ -48,4 +51,18 @@ public interface EducareaDB {
     void updateCloudToken(String token, String cloudToken) throws Exception;
 
     void insertGroupPerson(GroupPerson groupPerson) throws Exception;
+
+    void updateGroupPerson(int groupPersonId, GroupPerson groupPerson) throws Exception;
+
+    void insertPersonInvite(GroupPersonInvite invite) throws Exception;
+
+    ArrayList<GroupPersonInvite> getPersonInviteByUserId(int userId) throws Exception;
+
+    GroupPersonInvite getPersonInviteByPersonId(int groupPersonId) throws Exception;
+
+    GroupPersonInvite getGroupPersonInviteById(int groupPersonInviteId) throws Exception;
+
+    void removeGroupPersonInvite(int inviteId) throws Exception;
+
+    void removeGroupPersonInviteByPersonId(int groupPersonId) throws Exception;
 }
