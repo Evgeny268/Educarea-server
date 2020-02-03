@@ -11,17 +11,19 @@ public class AppWebSocket extends WebSocketServer {
     private static final Object lock = new Object();
     private static final int TCP_PORT = 4444;
     private HashMap<WebSocket, ClientInfo> clients;// может лучше ConcurrentHashMap и убрать все synchronized?
+    private AppLogger log;
 
     public AppWebSocket() {
         super(new InetSocketAddress(TCP_PORT));
         clients = new HashMap<>();
+        log = AppContext.log;
     }
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         synchronized (lock){
             clients.put(conn,new ClientInfo());
-            System.out.println("new client");
+            log.info("new connection from "+ conn.getRemoteSocketAddress().getAddress().getHostName());
         }
     }
 
@@ -30,12 +32,11 @@ public class AppWebSocket extends WebSocketServer {
         synchronized (lock){
             clients.remove(conn);
         }
-        System.out.println("close connection. Clients count = "+clients.size());
+        log.info("close connection "+conn.getRemoteSocketAddress().getAddress().getHostName()+" Clients count = "+clients.size());
     }
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        System.out.println(message);
         MessageWorker messageWorker = new MessageWorker(conn,message);
         Thread thread = new Thread(messageWorker);
         thread.start();

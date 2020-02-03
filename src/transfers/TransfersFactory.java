@@ -123,6 +123,24 @@ public class TransfersFactory {
                     return null;
                 }
             }
+            else if (node.get("type").asText().equals("."+Timetable.class.getSimpleName())) {
+                try {
+                    Timetable out = objectMapper.readValue(jsonString, Timetable.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+            else if (node.get("type").asText().equals("."+Timetables.class.getSimpleName())) {
+                try {
+                    Timetables out = objectMapper.readValue(jsonString, Timetables.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
             else {
                 return null;
             }

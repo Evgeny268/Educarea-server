@@ -1,10 +1,7 @@
 package DBUtils;
 
 import com.educarea.ServerApp.EducareaDB;
-import transfers.Group;
-import transfers.GroupPerson;
-import transfers.GroupPersonInvite;
-import transfers.User;
+import transfers.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -524,6 +521,202 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
         .setSql("INSERT INTO educarea.group_person_invite (group_person_id, user_id) VALUES (?,?)")
         .setParameters(String.valueOf(invite.groupPersonId),String.valueOf(invite.userId))
         .setTypes("int","int")){
+            builder.build();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public void insertTimetable(Timetable timetable) throws Exception {
+        String []params = new String[7];
+        params[0] = String.valueOf(timetable.groupId);
+        if (timetable.groupPersonId==0){
+            params[1] = null;
+        }else {
+            params[1] = String.valueOf(timetable.groupPersonId);
+        }
+        params[2] = timetable.objectName;
+        params[3] = timetable.cabinet;
+        params[4] = String.valueOf(timetable.parityweek);
+        params[5] = String.valueOf(timetable.day);
+        params[6] = timetable.time;
+        try(DBWorker.Builder builder = new Builder(false)
+        .setSql("INSERT INTO educarea.timetable (group_id, group_person_id, object_name, cabinet, parityweek, day, time) VALUES (?,?,?,?,?,?,?)")
+        .setParameters(params)
+        .setTypes("int","int","String","String","int","int","String")){
+            builder.build();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public void updateTimetable(int timetableId, Timetable timetable) throws Exception {
+        String []params = new String[8];
+        params[0] = String.valueOf(timetable.groupId);
+        if (timetable.groupPersonId==0){
+            params[1] = null;
+        }else {
+            params[1] = String.valueOf(timetable.groupPersonId);
+        }
+        params[2] = timetable.objectName;
+        params[3] = timetable.cabinet;
+        params[4] = String.valueOf(timetable.parityweek);
+        params[5] = String.valueOf(timetable.day);
+        params[6] = timetable.time;
+        params[7] = String.valueOf(timetable.timetableId);
+        try(DBWorker.Builder builder = new Builder(false)
+        .setSql("UPDATE educarea.timetable SET " +
+                "group_id = ?, " +
+                "group_person_id = ?, " +
+                "object_name = ?, " +
+                "cabinet = ?, " +
+                "parityweek = ?, " +
+                "day = ?, " +
+                "time = ? " +
+                "WHERE timetable_id = ?")
+        .setParameters(params)
+        .setTypes("int","int","String","String","int","int","String","int")){
+            builder.build();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public void deleteTimetable(int timetableId) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+        .setSql("DELETE FROM educarea.timetable WHERE timetable_id = ?")
+        .setParameters(String.valueOf(timetableId))
+        .setTypes("int")){
+            builder.build();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public Timetable getTimetableById(int timetableId) throws Exception {
+        Timetable timetable = new Timetable();
+        try(DBWorker.Builder builder = new Builder(true)
+        .setSql("SELECT * FROM educarea.timetable WHERE timetable_id = ?")
+        .setParameters(String.valueOf(timetableId))
+        .setTypes("int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                timetable.timetableId = resultSet.getInt(1);
+                timetable.groupId = resultSet.getInt(2);
+                timetable.groupPersonId = resultSet.getInt(3);
+                timetable.objectName = resultSet.getString(4);
+                timetable.cabinet = resultSet.getString(5);
+                timetable.parityweek = resultSet.getInt(6);
+                timetable.day = resultSet.getInt(7);
+                timetable.time = resultSet.getString(8);
+            }
+        }catch (Exception e){
+            throw e;
+        }
+        return timetable;
+    }
+
+    @Override
+    public ArrayList<Timetable> getTimetableByGroupId(int groupId) throws Exception {
+        ArrayList<Timetable> list = new ArrayList<>();
+        try(DBWorker.Builder builder = new Builder(true)
+                .setSql("SELECT * FROM educarea.timetable WHERE group_id = ?")
+                .setParameters(String.valueOf(groupId))
+                .setTypes("int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                Timetable timetable = new Timetable();
+                timetable.timetableId = resultSet.getInt(1);
+                timetable.groupId = resultSet.getInt(2);
+                timetable.groupPersonId = resultSet.getInt(3);
+                timetable.objectName = resultSet.getString(4);
+                timetable.cabinet = resultSet.getString(5);
+                timetable.parityweek = resultSet.getInt(6);
+                timetable.day = resultSet.getInt(7);
+                timetable.time = resultSet.getString(8);
+                list.add(timetable);
+            }
+        }catch (Exception e){
+            throw e;
+        }
+        return list;
+    }
+
+    @Override
+    public ArrayList<Timetable> getTimetableByPersonId(int groupPersonId) throws Exception {
+        ArrayList<Timetable> list = new ArrayList<>();
+        try(DBWorker.Builder builder = new Builder(true)
+                .setSql("SELECT * FROM educarea.timetable WHERE group_person_id = ?")
+                .setParameters(String.valueOf(groupPersonId))
+                .setTypes("int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                Timetable timetable = new Timetable();
+                timetable.timetableId = resultSet.getInt(1);
+                timetable.groupId = resultSet.getInt(2);
+                timetable.groupPersonId = resultSet.getInt(3);
+                timetable.objectName = resultSet.getString(4);
+                timetable.cabinet = resultSet.getString(5);
+                timetable.parityweek = resultSet.getInt(6);
+                timetable.day = resultSet.getInt(7);
+                timetable.time = resultSet.getString(8);
+                list.add(timetable);
+            }
+        }catch (Exception e){
+            throw e;
+        }
+        return list;
+    }
+
+    @Override
+    public void deleteGroupPersonById(int groupPersonId) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+        .setSql("DELETE FROM educarea.group_person WHERE group_person_id = ?")
+        .setParameters(String.valueOf(groupPersonId))
+        .setTypes("int")){
+            builder.build();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public void deleteGroupPersonByGroupId(int groupId) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+                .setSql("DELETE FROM educarea.group_person WHERE group_id = ?")
+                .setParameters(String.valueOf(groupId))
+                .setTypes("int")){
+            builder.build();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public void deleteGroupById(int groupId) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+                .setSql("DELETE FROM educarea.group WHERE group_id = ?")
+                .setParameters(String.valueOf(groupId))
+                .setTypes("int")){
+            builder.build();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public void deletePersonInviteByPersonId(int groupPersonId) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+                .setSql("DELETE FROM educarea.group_person_invite WHERE group_person_id = ?")
+                .setParameters(String.valueOf(groupPersonId))
+                .setTypes("int")){
             builder.build();
         }catch (Exception e){
             throw e;

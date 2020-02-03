@@ -1,9 +1,6 @@
 package com.educarea.ServerApp;
 
-import transfers.Group;
-import transfers.GroupPerson;
-import transfers.GroupPersonInvite;
-import transfers.User;
+import transfers.*;
 
 import java.sql.Savepoint;
 import java.util.ArrayList;
@@ -52,9 +49,17 @@ public interface EducareaDB {
 
     void insertGroupPerson(GroupPerson groupPerson) throws Exception;
 
+    void deleteGroupPersonById(int groupPersonId) throws Exception;
+
+    void deleteGroupPersonByGroupId(int groupId) throws Exception;
+
+    void deleteGroupById(int groupId) throws Exception;
+
     void updateGroupPerson(int groupPersonId, GroupPerson groupPerson) throws Exception;
 
     void insertPersonInvite(GroupPersonInvite invite) throws Exception;
+
+    void deletePersonInviteByPersonId(int groupPersonId) throws Exception;
 
     ArrayList<GroupPersonInvite> getPersonInviteByUserId(int userId) throws Exception;
 
@@ -65,4 +70,16 @@ public interface EducareaDB {
     void removeGroupPersonInvite(int inviteId) throws Exception;
 
     void removeGroupPersonInviteByPersonId(int groupPersonId) throws Exception;
+
+    void insertTimetable(Timetable timetable) throws Exception;
+
+    void updateTimetable(int timetableId, Timetable timetable) throws Exception;
+
+    void deleteTimetable(int timetableId) throws Exception;
+
+    Timetable getTimetableById(int timetableId) throws Exception;
+
+    ArrayList<Timetable> getTimetableByGroupId(int groupId) throws Exception;
+
+    ArrayList<Timetable> getTimetableByPersonId(int groupPersonId) throws Exception;
 }

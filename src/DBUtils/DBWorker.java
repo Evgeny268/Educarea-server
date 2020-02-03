@@ -1,6 +1,8 @@
 package DBUtils;
 
 
+import com.educarea.ServerApp.AppContext;
+
 import java.sql.*;
 
 public class DBWorker {
@@ -38,6 +40,7 @@ public class DBWorker {
             connection.setAutoCommit(false);
             alreadyConnect = true;
         } catch (SQLException e) {
+            AppContext.log.severe("can't connect to DB",e);
             throw e;
         }
     }

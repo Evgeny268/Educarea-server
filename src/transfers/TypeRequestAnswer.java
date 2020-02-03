@@ -31,4 +31,8 @@ public interface TypeRequestAnswer {
     String UNTIE_USER = "UNTIE_USER";
     String GET_INVITES = "GET_INVITES";
     String GET_PERSON_INVITES = "GET_PERSON_INVITES";
+    String GET_TIMETABLE = "GET_TIMETABLE";
+    String DELETE_TIMETABLE = "DELETE_TIMETABLE";
+    String DELETE_PERSON = "DELETE_PERSON";
+    String DELETE_GROUP = "DELETE_GROUP";
 }

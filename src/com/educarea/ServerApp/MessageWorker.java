@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.security.SecureRandom;
 import java.sql.Savepoint;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -22,9 +24,12 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
     public static final int MAX_TOKEN_LENGTH = 200;
     public static final int MAX_TRY_CONNECT_WRONG_TOKEN = 5;
 
+    private AppLogger log;
+
     public MessageWorker(WebSocket webSocket, String recivedMessage) {
         this.webSocket = webSocket;
         this.recivedMessage = recivedMessage;
+        log = AppContext.log;
     }
 
     @Override
@@ -38,6 +43,13 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
             authentication((Authentication) message);
         }else if (message instanceof Authorization){
             authorization((Authorization) message);
+        }else if (message instanceof Timetable){
+            try {
+                timetableEdit((Timetable) message);
+            } catch (Exception e) {
+                log.warn("Timetable transfer error",e);
+                sendError();
+            }
         }
         else if (message instanceof TransferRequestAnswer){
             if (((TransferRequestAnswer) message).request==null){
@@ -74,6 +86,35 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 getInvites();
             }else if (((TransferRequestAnswer) message).request.equals(GET_PERSON_INVITES)){
                 getPersonInvites((TransferRequestAnswer) message);
+            }else if (((TransferRequestAnswer) message).request.equals(GET_TIMETABLE)){
+                try {
+                    getTimetable((TransferRequestAnswer) message);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    log.warn("getTimetable error",e);
+                    sendError();
+                }
+            }else if (((TransferRequestAnswer) message).request.equals(DELETE_TIMETABLE)){
+                try {
+                    deleteTimetable((TransferRequestAnswer) message);
+                } catch (Exception e) {
+                    log.warn("deleteTimetable error",e);
+                    sendError();
+                }
+            }else if (((TransferRequestAnswer) message).request.equals(DELETE_PERSON)){
+                try {
+                    deletePerson((TransferRequestAnswer) message);
+                } catch (Exception e) {
+                    log.warn("deletePerson",e);
+                    sendError();
+                }
+            }else if (((TransferRequestAnswer) message).request.equals(DELETE_GROUP)){
+                try {
+                    deleteGroup((TransferRequestAnswer) message);
+                } catch (Exception e) {
+                    log.warn("deleteGroup",e);
+                    sendError();
+                }
             }
         }
         else {
@@ -100,7 +141,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
         try {
             alreadyCreate = AppContext.educareaDB.getUserIdByLogin(registration.login);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn("err",e);
             sendError();
             return;
         }
@@ -112,7 +153,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 try {
                     savepoint = AppContext.educareaDB.setSavepoint("insert_user");
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.warn("err",e);
                     sendError();
                     return;
                 }
@@ -120,12 +161,13 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                     AppContext.educareaDB.insertNewUser(new User(registration.login,registration.password));
                     AppContext.educareaDB.commit();
                     sendAnswer(REGISTRATION_DONE);
+                    log.info("new registration "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.warn("insertNewUser error",e);
                     try {
                         AppContext.educareaDB.rollback(savepoint);
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        log.warn("err",ex);
                     }
                     sendError();
                 }
@@ -154,7 +196,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
             try {
                 userId = AppContext.educareaDB.getUserIdByLogAndPass(authentication.login, authentication.password);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.warn("err",e);
                 sendError();
                 return;
             }
@@ -168,7 +210,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                         token = generateSafeToken(tokenSize);
                     } while (AppContext.educareaDB.getUserIdByAuthToken(token) != 0);
                 }catch (Exception e) {
-                    e.printStackTrace();
+                    log.warn("err",e);
                     sendError();
                     return;
                 }
@@ -177,7 +219,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                     try{
                         savepoint = AppContext.educareaDB.setSavepoint("insert_token");
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.warn("err",e);
                         sendError();
                         return;
                     }
@@ -186,8 +228,9 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                         AppContext.educareaDB.commit();
                         TransferRequestAnswer out = new TransferRequestAnswer(AUTHENTICATION_DONE,token);
                         sendTransfers(out);
+                        log.info("new AUTHENTICATION "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.warn("err",e);
                         try {
                             AppContext.educareaDB.rollback(savepoint);
                         } catch (Exception ex) {
@@ -210,7 +253,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
         try {
             userId = AppContext.educareaDB.getUserIdByAuthToken(authorization.token);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn("err",e);
             sendError();
             return;
         }
@@ -233,8 +276,9 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 updateClientInfo(clientInfo, userId, authorization.token, authorization.cloudToken);
                 TransferRequestAnswer out = new TransferRequestAnswer(AUTHORIZATION_DONE,String.valueOf(userId),clientInfo.getLogin());
                 sendTransfers(out);
+                log.info("AUTHORIZATION_DONE "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
             } catch (Exception e) {
-                e.printStackTrace();
+                log.warn("err",e);
                 sendError();
             }
         }
@@ -271,7 +315,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                     try {
                         savepoint = AppContext.educareaDB.setSavepoint("create_group");
                     }catch (Exception e){
-                        e.printStackTrace();
+                        log.warn("err",e);
                         sendError();
                         return;
                     }
@@ -282,12 +326,13 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                         AppContext.educareaDB.insertGroupPerson(groupPerson);
                         AppContext.educareaDB.commit();
                         sendAnswer(GROUP_ADDED);
+                        log.info("GROUP_ADDED "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
                     }catch (Exception e){
-                        e.printStackTrace();
+                        log.warn("err",e);
                         try {
                             AppContext.educareaDB.rollback(savepoint);
                         } catch (Exception ex) {
-                            ex.printStackTrace();
+                            log.warn("err",ex);
                         }
                         sendError();
                     }
@@ -315,9 +360,10 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                         }
                     }
                 }
+                log.info("getMyGroup "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
                 sendTransfers(userGroups);
             }catch (Exception e){
-                e.printStackTrace();
+                log.warn("err",e);
                 sendError();
             }
         }else {
@@ -330,7 +376,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
         try {
             groupId = Integer.valueOf(transferRequestAnswer.extra);
         }catch (Exception e){
-            e.printStackTrace();
+            log.warn("err",e);
             sendError();
             return;
         }
@@ -366,6 +412,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                     try {
                         savepoint = AppContext.educareaDB.setSavepoint("leave_group");
                     }catch (Exception e){
+                        log.warn("err",e);
                         sendError();
                         return;
                     }
@@ -373,8 +420,9 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                         AppContext.educareaDB.updateGroupPersonUserId(groupPersonId, 0);
                         AppContext.educareaDB.commit();
                         sendAnswer(UPDATE_INFO);
+                        log.info("leave group "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
                     }catch (Exception e){
-                        e.printStackTrace();
+                        log.warn("err",e);
                         sendError();
                         try {
                             AppContext.educareaDB.rollback(savepoint);
@@ -393,7 +441,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
         try {
             groupId = Integer.parseInt(transferRequestAnswer.extra);
         }catch (Exception e){
-            e.printStackTrace();
+            log.warn("err",e);
             sendError();
             return;
         }
@@ -404,7 +452,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
             try {
                 groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(groupId);
             }catch (Exception e){
-                e.printStackTrace();
+                log.warn("err",e);
                 return;
             }
             if (userInGroup(userId, groupPeople)){
@@ -413,6 +461,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 }
                 GroupPersons out = new GroupPersons(groupPeople);
                 sendTransfers(out);
+                log.info("getGroupPerson "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
             }else {
                 sendAnswer(NO_PERMISSION);
             }
@@ -429,7 +478,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 try {
                     groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(groupId);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.warn("err",e);
                     sendError();
                     return;
                 }
@@ -440,7 +489,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                             try {
                                 savepoint = AppContext.educareaDB.setSavepoint("new_groupPerson");
                             }catch (Exception e){
-                                e.printStackTrace();
+                                log.warn("err",e);
                                 sendError();
                                 return;
                             }
@@ -449,12 +498,13 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                                 AppContext.educareaDB.insertGroupPerson(groupPerson);
                                 AppContext.educareaDB.commit();
                                 sendAnswer(UPDATE_INFO);
+                                log.info("create group person "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
                             }catch (Exception e){
-                                e.printStackTrace();
+                                log.warn("err",e);
                                 try {
                                     AppContext.educareaDB.rollback(savepoint);
                                 }catch (Exception ex){
-                                    ex.printStackTrace();
+                                    log.warn("err",ex);
                                 }
                                 sendError();
                                 return;
@@ -484,18 +534,22 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                     GroupPerson oldGroupPerson = AppContext.educareaDB.getGroupPersonById(groupPerson.groupPersonId);
                     groupPerson.userId = oldGroupPerson.userId;
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.warn("err",e);
                     sendError();
                     return;
                 }
                 if (userInGroup(userId, groupPeople) && personInGroup(groupPerson.groupPersonId, groupPeople)){
                     if (userIsModerator(userId, groupPeople)){
                         if (checkNewGroupPesron(groupPerson)) {
+                            if (lifeModeratorCount(groupPeople)==1 && groupPerson.moderator==0 && groupPerson.userId==userId){
+                                sendAnswer(NO_PERMISSION);
+                                return;
+                            }
                             Savepoint savepoint = null;
                             try {
                                 savepoint = AppContext.educareaDB.setSavepoint("update_groupPerson");
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                log.warn("err",e);
                                 sendError();
                                 return;
                             }
@@ -503,12 +557,13 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                                 AppContext.educareaDB.updateGroupPerson(groupPerson.groupPersonId, groupPerson);
                                 AppContext.educareaDB.commit();
                                 sendAnswer(UPDATE_INFO);
+                                log.info("update group person "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
                             }catch (Exception e){
-                                e.printStackTrace();
+                                log.warn("err",e);
                                 try {
                                     AppContext.educareaDB.rollback(savepoint);
                                 }catch (Exception ex){
-                                    ex.printStackTrace();
+                                    log.warn("err",ex);
                                 }
                                 sendError();
                                 return;
@@ -521,6 +576,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
     }
 
     private void getInvites(){
+        log.info("get invites "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
         ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
         int userId = checkAuthorizationGetUserId(clientInfo);
         try {
@@ -538,17 +594,18 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 sendTransfers(out);
             }
         }catch (Exception e){
-            e.printStackTrace();
+            log.warn("err",e);
             sendError();
         }
     }
 
     private void acceptInvite(TransferRequestAnswer transferRequestAnswer){
+        log.info("accept invites "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
         int inviteId = 0;
         try {
             inviteId = Integer.parseInt(transferRequestAnswer.extra);
         }catch (Exception e){
-            e.printStackTrace();
+            log.warn("err",e);
             sendError();
             return;
         }
@@ -560,7 +617,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 try {
                     savepoint = AppContext.educareaDB.setSavepoint("acceptInvite");
                 }catch (Exception e){
-                    e.printStackTrace();
+                    log.warn("err",e);
                     sendError();
                     return;
                 }
@@ -578,11 +635,11 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                         sendError();
                     }
                 }catch (Exception e){
-                    e.printStackTrace();
+                    log.warn("err",e);
                     try {
                         AppContext.educareaDB.rollback(savepoint);
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        log.warn("err",ex);
                     }
                     sendError();
                 }
@@ -591,11 +648,12 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
     }
 
     private void rejectInvite(TransferRequestAnswer transferRequestAnswer){
+        log.info("reject invites"+webSocket.getRemoteSocketAddress().getAddress().getHostName());
         int inviteId = 0;
         try {
             inviteId = Integer.parseInt(transferRequestAnswer.extra);
         }catch (Exception e){
-            e.printStackTrace();
+            log.warn("err",e);
             sendError();
             return;
         }
@@ -607,7 +665,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 try {
                     savepoint = AppContext.educareaDB.setSavepoint("rejectInvite");
                 }catch (Exception e){
-                    e.printStackTrace();
+                    log.warn("err",e);
                     sendError();
                     return;
                 }
@@ -621,11 +679,11 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                         sendError();
                     }
                 }catch (Exception e){
-                    e.printStackTrace();
+                    log.warn("err",e);
                     try {
                         AppContext.educareaDB.rollback(savepoint);
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        log.warn("err",ex);
                     }
                     sendError();
                 }
@@ -634,6 +692,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
     }
 
     private void inviteUser(TransferRequestAnswer transferRequestAnswer){
+        log.info("invite user "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
         int groupPersonId = Integer.parseInt(transferRequestAnswer.extra);;
         String login = transferRequestAnswer.extraArr[0];
         ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
@@ -650,6 +709,12 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                     if (userInGroup(userId, groupPeople)) {
                         if (userIsModerator(userId, groupPeople)) {
                             int inviteUserId = AppContext.educareaDB.getUserIdByLogin(login);
+                            for (int i = 0; i < groupPeople.size(); i++) {
+                                if (groupPeople.get(i).userId == inviteUserId){
+                                    sendError();
+                                    return;
+                                }
+                            }
                             if (inviteUserId == 0) {
                                 sendAnswer(USER_NOT_EXIST);
                             } else {
@@ -658,7 +723,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                                 try {
                                     savepoint = AppContext.educareaDB.setSavepoint("inviteUser");
                                 } catch (Exception e) {
-                                    e.printStackTrace();
+                                    log.warn("err",e);
                                     sendError();
                                     return;
                                 }
@@ -667,11 +732,11 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                                     AppContext.educareaDB.commit();
                                     sendAnswer(UPDATE_INFO);
                                 } catch (Exception e) {
-                                    e.printStackTrace();
+                                    log.warn("err",e);
                                     try {
                                         AppContext.educareaDB.rollback(savepoint);
                                     } catch (Exception ex) {
-                                        ex.printStackTrace();
+                                        log.warn("err",ex);
                                     }
                                     sendError();
                                 }
@@ -679,7 +744,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                         } else sendAnswer(NO_PERMISSION);
                     } else sendAnswer(NO_PERMISSION);
                 }catch (Exception e){
-                    e.printStackTrace();
+                    log.warn("err",e);
                     sendError();
                 }
             }
@@ -687,6 +752,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
     }
 
     private void untieUser(TransferRequestAnswer transferRequestAnswer){
+        log.info("untie user "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
         int groupPersonId = Integer.parseInt(transferRequestAnswer.extra);
         ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
         int userId = checkAuthorizationGetUserId(clientInfo);
@@ -708,7 +774,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                             try {
                                 savepoint = AppContext.educareaDB.setSavepoint("inviteUser");
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                log.warn("err",e);
                                 sendError();
                                 return;
                             }
@@ -718,18 +784,18 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                                 AppContext.educareaDB.commit();
                                 sendAnswer(UPDATE_INFO);
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                log.warn("err",e);
                                 try {
                                     AppContext.educareaDB.rollback(savepoint);
                                 } catch (Exception ex) {
-                                    ex.printStackTrace();
+                                    log.warn("err",ex);
                                 }
                                 sendError();
                             }
                         } else sendAnswer(NO_PERMISSION);
                     } else sendAnswer(NO_PERMISSION);
                 }catch (Exception e){
-                    e.printStackTrace();
+                    log.warn("err",e);
                     sendError();
                 }
             }
@@ -737,6 +803,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
     }
 
     private void getPersonInvites(TransferRequestAnswer transferRequestAnswer){
+        log.info("get person invites "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
         int groupPersonId = Integer.parseInt(transferRequestAnswer.extra);
         ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
         int userId = checkAuthorizationGetUserId(clientInfo);
@@ -751,11 +818,225 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                     } else sendAnswer(NO_PERMISSION);
                 } else sendAnswer(NO_PERMISSION);
             }catch (Exception e){
-                e.printStackTrace();
+                log.warn("err",e);
                 sendError();
                 return;
             }
         }
+    }
+
+    private void timetableEdit(Timetable timetable) throws Exception{
+        log.info("timetable edit"+webSocket.getRemoteSocketAddress().getAddress().getHostName());
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            synchronized (lock) {
+                if (checkTimetable(timetable)) {
+                    ArrayList<GroupPerson> groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(timetable.groupId);
+                    if (userInGroup(userId, groupPeople)) {
+                        if (userIsModerator(userId, groupPeople)) {
+                            if (timetable.groupPersonId != 0) {
+                                GroupPerson teacher = AppContext.educareaDB.getGroupPersonById(timetable.groupPersonId);
+                                if ((teacher.groupId != timetable.groupId) || teacher.personType == 0) {
+                                    sendAnswer(NO_PERMISSION);
+                                    return;
+                                }
+                            }
+                                if (timetable.timetableId != 0) {
+                                    Timetable oldTimeTable = AppContext.educareaDB.getTimetableById(timetable.timetableId);
+                                    if (oldTimeTable.groupId != timetable.groupId) {
+                                        sendAnswer(NO_PERMISSION);
+                                        return;
+                                    }
+                                }
+                                Savepoint savepoint = null;
+                                try {
+                                    savepoint = AppContext.educareaDB.setSavepoint("timetableEdit");
+                                } catch (Exception e) {
+                                    log.warn("err",e);
+                                    sendError();
+                                    return;
+                                }
+                                try {
+                                    if (timetable.timetableId != 0) {
+                                        AppContext.educareaDB.updateTimetable(timetable.timetableId, timetable);
+                                    } else {
+                                        AppContext.educareaDB.insertTimetable(timetable);
+                                    }
+                                    AppContext.educareaDB.commit();
+                                    sendAnswer(UPDATE_INFO);
+                                } catch (Exception e) {
+                                    log.warn("err",e);
+                                    try {
+                                        AppContext.educareaDB.rollback(savepoint);
+                                    } catch (Exception ex) {
+                                        log.warn("err",ex);
+                                    }
+                                    sendError();
+                                }
+                        } else sendAnswer(NO_PERMISSION);
+                    } else sendAnswer(NO_PERMISSION);
+                } else sendError();
+            }
+        }
+    }
+
+    private void deleteTimetable(TransferRequestAnswer transferRequestAnswer) throws Exception{
+        log.info("delete timetable "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
+        int timetableId = Integer.parseInt(transferRequestAnswer.extra);
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            synchronized (lock) {
+                Timetable timetable = AppContext.educareaDB.getTimetableById(timetableId);
+                ArrayList<GroupPerson> groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(timetable.groupId);
+                if (userInGroup(userId, groupPeople)) {
+                    if (userIsModerator(userId, groupPeople)) {
+                        Savepoint savepoint = null;
+                        try{
+                            savepoint = AppContext.educareaDB.setSavepoint("deleteTimetable");
+                        }catch (Exception e){
+                            log.warn("err",e);
+                            sendError();
+                            return;
+                        }
+                        try {
+                            AppContext.educareaDB.deleteTimetable(timetableId);
+                            AppContext.educareaDB.commit();
+                            sendAnswer(UPDATE_INFO);
+                        }catch (Exception e){
+                            log.warn("err",e);
+                            try {
+                                AppContext.educareaDB.rollback(savepoint);
+                            } catch (Exception ex) {
+                                log.warn("err",ex);
+                            }
+                            sendError();
+                        }
+                    } else sendAnswer(NO_PERMISSION);
+                } else sendAnswer(NO_PERMISSION);
+            }
+        }
+    }
+
+    private void deletePerson(TransferRequestAnswer transferRequestAnswer) throws Exception{
+        log.info("delete person"+webSocket.getRemoteSocketAddress().getAddress().getHostName());
+        int groupPersonId = Integer.parseInt(transferRequestAnswer.extra);
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            synchronized (lock) {
+                GroupPerson deletePerson = AppContext.educareaDB.getGroupPersonById(groupPersonId);
+                if (deletePerson.userId == userId) {
+                    sendAnswer(NO_PERMISSION);
+                    return;
+                }
+                ArrayList<GroupPerson> groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(deletePerson.groupId);
+                if (userInGroup(userId, groupPeople)) {
+                    if (userIsModerator(userId, groupPeople)) {
+                        ArrayList<Timetable> timetables = AppContext.educareaDB.getTimetableByPersonId(groupPersonId);
+                        Savepoint savepoint = null;
+                        try {
+                            savepoint = AppContext.educareaDB.setSavepoint("deletePerson");
+                        } catch (Exception e) {
+                            log.warn("err",e);
+                            sendError();
+                            return;
+                        }
+                        try {
+                            for (int i = 0; i < timetables.size(); i++) {
+                                Timetable timetable = timetables.get(i);
+                                if (timetable.groupPersonId == groupPersonId) {
+                                    timetable.groupPersonId = 0;
+                                    AppContext.educareaDB.updateTimetable(timetable.timetableId, timetable);
+                                }
+                            }
+                            AppContext.educareaDB.deletePersonInviteByPersonId(groupPersonId);
+                            AppContext.educareaDB.deleteGroupPersonById(groupPersonId);
+                            AppContext.educareaDB.commit();
+                            sendAnswer(UPDATE_INFO);
+                        } catch (Exception e) {
+                            log.warn("err",e);
+                            try {
+                                AppContext.educareaDB.rollback(savepoint);
+                            } catch (Exception ex) {
+                                log.warn("err",ex);
+                            }
+                            sendError();
+                        }
+                    } else sendAnswer(NO_PERMISSION);
+                } else sendAnswer(NO_PERMISSION);
+            }
+        }
+    }
+
+    private void deleteGroup(TransferRequestAnswer transferRequestAnswer) throws Exception{
+        log.info("delete group "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
+        int groupId = Integer.parseInt(transferRequestAnswer.extra);
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            synchronized (lock){
+                ArrayList<GroupPerson> groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(groupId);
+                if (userInGroup(userId,groupPeople)){
+                    if (userIsModerator(userId,groupPeople)){
+                        Savepoint savepoint = null;
+                        try {
+                            savepoint = AppContext.educareaDB.setSavepoint("deleteGroup");
+                        } catch (Exception e) {
+                            log.warn("err",e);
+                            sendError();
+                            return;
+                        }
+                        try {
+                            for (int i = 0; i < groupPeople.size(); i++) {
+                                AppContext.educareaDB.deletePersonInviteByPersonId(groupPeople.get(i).groupPersonId);
+                            }
+                            AppContext.educareaDB.deleteGroupPersonByGroupId(groupId);
+                            AppContext.educareaDB.deleteGroupById(groupId);
+                            AppContext.educareaDB.commit();
+                            sendAnswer(DELETE_GROUP);
+                        } catch (Exception e) {
+                            log.warn("err",e);
+                            try {
+                                AppContext.educareaDB.rollback(savepoint);
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                            sendError();
+                        }
+                    }else sendAnswer(NO_PERMISSION);
+                }else sendAnswer(NO_PERMISSION);
+            }
+        }
+    }
+
+    private void getTimetable(TransferRequestAnswer transferRequestAnswer) throws Exception{
+        log.info("get timetable "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
+        int groupId = Integer.parseInt(transferRequestAnswer.extra);
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            ArrayList<GroupPerson> groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(groupId);
+            if (userInGroup(userId,groupPeople)){
+                ArrayList<Timetable> timetables = AppContext.educareaDB.getTimetableByGroupId(groupId);
+                Collections.sort(timetables);
+                sendTransfers(new Timetables(timetables));
+            }else sendAnswer(NO_PERMISSION);
+        }
+    }
+
+    private boolean checkTimetable(Timetable timetable){
+        if (timetable.day<1 || timetable.day>7) return false;
+        if (timetable.parityweek<0 || timetable.parityweek>2) return false;
+        if (timetable.time!=null){
+            try {
+                LocalTime time = LocalTime.parse(timetable.time);
+            }catch (Exception e){
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean checkNewGroupPesron(GroupPerson groupPerson){
@@ -803,6 +1084,17 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 if (groupPeople.get(i).moderator == 1){
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    private boolean personIsTeacher(int groupPersonId, ArrayList<GroupPerson> groupPeople){
+        for (int i = 0; i < groupPeople.size(); i++) {
+            if (groupPersonId == groupPeople.get(i).groupPersonId){
+                if (groupPeople.get(i).personType==1){
+                    return true;
+                }else return false;
             }
         }
         return false;

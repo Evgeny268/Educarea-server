@@ -9,7 +9,7 @@ public class Main {
         final Thread mainThread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
-                //TODO добавить сообщение в логер о завершении работы программы (когда появится логер)
+                AppContext.log.severe("-----------CLOSE PROGRAM!--------");
                 try {
                     mainThread.join();
                 } catch (InterruptedException e) {
