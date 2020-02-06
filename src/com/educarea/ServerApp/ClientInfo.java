@@ -2,6 +2,7 @@ package com.educarea.ServerApp;
 
 
 public class ClientInfo {
+    private int id = 0;
     private String login = null;
     private String token = null;
     private String cloudToken = null;
@@ -18,6 +19,14 @@ public class ClientInfo {
         this.login = login;
         this.token = token;
         this.cloudToken = cloudToken;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getLogin() {

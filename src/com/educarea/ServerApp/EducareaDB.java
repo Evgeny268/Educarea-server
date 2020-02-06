@@ -4,6 +4,7 @@ import transfers.*;
 
 import java.sql.Savepoint;
 import java.util.ArrayList;
+import java.util.Date;
 
 public interface EducareaDB {
 
@@ -82,4 +83,10 @@ public interface EducareaDB {
     ArrayList<Timetable> getTimetableByGroupId(int groupId) throws Exception;
 
     ArrayList<Timetable> getTimetableByPersonId(int groupPersonId) throws Exception;
+
+    void insertChannelMessage(ChannelMessage channelMessage) throws Exception;
+
+    ArrayList<ChannelMessage> selectChannelMessageByPersonId(int personId, int count) throws Exception;
+
+    ArrayList<ChannelMessage> selectChannelMessageByPersonId(int personId, Date lastDate, int count) throws Exception;
 }

@@ -37,6 +37,7 @@ public class AppWebSocket extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
+        System.out.println(message);
         MessageWorker messageWorker = new MessageWorker(conn,message);
         Thread thread = new Thread(messageWorker);
         thread.start();

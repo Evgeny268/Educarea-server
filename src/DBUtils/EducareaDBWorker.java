@@ -722,4 +722,77 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
             throw e;
         }
     }
+
+    @Override
+    public void insertChannelMessage(ChannelMessage channelMessage) throws Exception {
+        Date date = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String currentDateTime = format.format(date);
+        try(DBWorker.Builder builder = new Builder(false)
+        .setSql("INSERT INTO educarea.channel_message (person_from, text, date) VALUES (?,?,?)")
+        .setParameters(String.valueOf(channelMessage.personFrom),channelMessage.text, currentDateTime)
+        .setTypes("int","String","String")){
+            builder.build();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public ArrayList<ChannelMessage> selectChannelMessageByPersonId(int personId, int count) throws Exception {
+        ArrayList<ChannelMessage> messages = new ArrayList<>();
+        try(DBWorker.Builder builder = new Builder(true)
+        .setSql("SELECT * FROM educarea.channel_message WHERE (person_from = ?) ORDER BY channel_message.date DESC LIMIT ?;")
+        .setParameters(String.valueOf(personId),String.valueOf(count))
+        .setTypes("int","int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                ChannelMessage message = new ChannelMessage();
+                message.channelMessageId = resultSet.getInt(1);
+                message.personFrom = resultSet.getInt(2);
+                message.text = resultSet.getString(3);
+                String sDate = resultSet.getString(4);
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                format.setTimeZone(TimeZone.getTimeZone("UTC"));
+                Date date = format.parse(sDate);
+                message.date = date;
+                message.readIn = resultSet.getDate(5);
+                messages.add(message);
+            }
+        }catch (Exception e){
+            throw e;
+        }
+        return messages;
+    }
+
+    @Override
+    public ArrayList<ChannelMessage> selectChannelMessageByPersonId(int personId, Date lastDate, int count) throws Exception {
+        ArrayList<ChannelMessage> messages = new ArrayList<>();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String strDate = format.format(lastDate);
+        try(DBWorker.Builder builder = new Builder(true)
+                .setSql("SELECT * FROM educarea.channel_message WHERE (person_from = ? AND date < ?) ORDER BY channel_message.date DESC LIMIT ?;")
+                .setParameters(String.valueOf(personId),strDate,String.valueOf(count))
+                .setTypes("int","String","int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                ChannelMessage message = new ChannelMessage();
+                message.channelMessageId = resultSet.getInt(1);
+                message.personFrom = resultSet.getInt(2);
+                message.text = resultSet.getString(3);
+                String sDate = resultSet.getString(4);
+                Date date = format.parse(sDate);
+                message.date = date;
+                message.readIn = resultSet.getDate(5);
+                messages.add(message);
+            }
+        }catch (Exception e){
+            throw e;
+        }
+        return messages;
+    }
 }

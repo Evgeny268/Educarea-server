@@ -8,9 +8,9 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.security.SecureRandom;
 import java.sql.Savepoint;
+import java.text.SimpleDateFormat;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -113,6 +113,20 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                     deleteGroup((TransferRequestAnswer) message);
                 } catch (Exception e) {
                     log.warn("deleteGroup",e);
+                    sendError();
+                }
+            }else if (((TransferRequestAnswer) message).request.equals(SEND_CHANNEL_MESSAGE)){
+                try {
+                    sendChannelMessage((TransferRequestAnswer) message);
+                } catch (Exception e) {
+                    log.warn("error in sendChannelMessage method",e);
+                    sendError();
+                }
+            }else if (((TransferRequestAnswer) message).request.equals(GET_CHANNEL_MESSAGE)){
+                try {
+                    getChannelMessage((TransferRequestAnswer) message);
+                } catch (Exception e) {
+                    log.warn("error in getChannelMessage method",e);
                     sendError();
                 }
             }
@@ -1026,6 +1040,113 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
         }
     }
 
+    private void sendChannelMessage(TransferRequestAnswer transferRequestAnswer) throws Exception{
+        int groupId = Integer.parseInt(transferRequestAnswer.extra);
+        String message = transferRequestAnswer.extraArr[0];
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            ArrayList<GroupPerson> groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(groupId);
+            if (userInGroup(userId, groupPeople)){
+                GroupPerson groupPerson = getPersonByUserId(userId,groupPeople);
+                if (groupPerson.personType==0 && groupPerson.moderator==0){
+                    sendAnswer(NO_PERMISSION);
+                    return;
+                }
+                ChannelMessage channelMessage = new ChannelMessage(groupPerson.groupPersonId,message);
+                Savepoint savepoint = null;
+                savepoint = AppContext.educareaDB.setSavepoint("sendChannelMessage");
+                try {
+                    AppContext.educareaDB.insertChannelMessage(channelMessage);
+                    AppContext.educareaDB.commit();
+                }catch (Exception e){
+                    log.warn("can't insert new channel message in DB",e);
+                    AppContext.educareaDB.rollback(savepoint);
+                    return;
+                }
+                sendToAllGroupUsers(new TransferRequestAnswer(NEW_CHANNEL_MESSAGE),groupId);
+            }
+        }
+    }
+
+    private void getChannelMessage(TransferRequestAnswer transferRequestAnswer) throws Exception{
+        int groupId = Integer.parseInt(transferRequestAnswer.extra);
+        int count = Integer.parseInt(transferRequestAnswer.extraArr[0]);
+        Date date = null;
+        if (transferRequestAnswer.extraArr.length>1) {
+            if (transferRequestAnswer.extraArr[1] != null) {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                format.setTimeZone(TimeZone.getTimeZone("UTC"));
+                date = format.parse(transferRequestAnswer.extraArr[1]);
+            }
+        }
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            ArrayList<GroupPerson> groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(groupId);
+            if (userInGroup(userId, groupPeople)){
+                GroupPerson groupPerson = getPersonByUserId(userId,groupPeople);
+                ArrayList<ChannelMessage> messages = null;
+                if (groupPerson.personType==1 && groupPerson.moderator==0){
+                    if (date==null){
+                        messages = AppContext.educareaDB.selectChannelMessageByPersonId(groupPerson.groupPersonId,count);
+                    }else {
+                        messages = AppContext.educareaDB.selectChannelMessageByPersonId(groupPerson.groupPersonId,date,count);
+                    }
+                }else {
+                    messages = new ArrayList<>();
+                    for (int i = 0; i < groupPeople.size(); i++) {
+                        if (date==null) {
+                            ArrayList<ChannelMessage> personMessages = AppContext.educareaDB.selectChannelMessageByPersonId(groupPeople.get(i).groupPersonId,count);
+                            messages.addAll(personMessages);
+                        }else {
+                            ArrayList<ChannelMessage> personMessages = AppContext.educareaDB.selectChannelMessageByPersonId(groupPeople.get(i).groupPersonId,date,count);
+                            messages.addAll(personMessages);
+                        }
+                    }
+                }
+                Collections.sort(messages);
+                if (messages.size()>count){
+                    ArrayList<ChannelMessage> temp = new ArrayList<>(messages);
+                    messages = new ArrayList<>();
+                    for (int i = count; i < temp.size(); i++) {
+                        messages.add(temp.get(i));
+                    }
+                }
+                sendTransfers(new ChannelMessages(messages));
+            }
+        }
+    }
+
+    private void sendToAllGroupUsers(Transfers transfers, int groupId){
+        ArrayList<GroupPerson> groupPeople = null;
+        try {
+            groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(groupId);
+        }catch (Exception e){
+            log.warn("can't get groupPeople in sendToAll method",e);
+            return;
+        }
+        ArrayList<Integer> usersId = new ArrayList<>();
+        for (int i = 0; i < groupPeople.size(); i++) {
+            if (groupPeople.get(i).userId!=0){
+                usersId.add(groupPeople.get(i).userId);
+            }
+        }
+        HashMap<WebSocket, ClientInfo> map = new HashMap<>(AppContext.appWebSocket.getClients());
+        for(Map.Entry<WebSocket, ClientInfo> entry: map.entrySet()){
+            try {
+                WebSocket webSocket = entry.getKey();
+                ClientInfo clientInfo = entry.getValue();
+                if (usersId.contains(clientInfo.getId())) {
+                    String out = objToJson(transfers);
+                    webSocket.send(out);
+                }
+            }catch (Exception e){
+                log.warn("can't send message to many users",e);
+            }
+        }
+    }
+
     private boolean checkTimetable(Timetable timetable){
         if (timetable.day<1 || timetable.day>7) return false;
         if (timetable.parityweek<0 || timetable.parityweek>2) return false;
@@ -1067,6 +1188,15 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
             }
         }
         return false;
+    }
+
+    private GroupPerson getPersonByUserId(int userId, ArrayList<GroupPerson> groupPeople){
+        for (int i = 0; i < groupPeople.size(); i++) {
+            if (userId == groupPeople.get(i).userId){
+                return groupPeople.get(i);
+            }
+        }
+        return null;
     }
 
     private boolean personInGroup(int groupPersonId, ArrayList<GroupPerson> groupPeople){
@@ -1166,6 +1296,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 if (user == null) {
                     throw new Exception("user is empty");
                 } else {
+                    clientInfo.setId(user.iduser);
                     clientInfo.setLogin(user.login);
                     clientInfo.setToken(token);
                     clientInfo.setCloudToken(cloudToken);

@@ -141,6 +141,24 @@ public class TransfersFactory {
                     return null;
                 }
             }
+            else if (node.get("type").asText().equals("."+ChannelMessage.class.getSimpleName())) {
+                try {
+                    ChannelMessage out = objectMapper.readValue(jsonString, ChannelMessage.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+            else if (node.get("type").asText().equals("."+ChannelMessages.class.getSimpleName())) {
+                try {
+                    ChannelMessages out = objectMapper.readValue(jsonString, ChannelMessages.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
             else {
                 return null;
             }

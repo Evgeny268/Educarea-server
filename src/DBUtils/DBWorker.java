@@ -13,6 +13,7 @@ public class DBWorker {
 
     private static final String settings = "?verifyServerCertificate=false"+
             "&useSSL=false"+
+            "&autoReconnect=true"+
             "&requireSSL=false"+
             "&useLegacyDatetimeCode=false"+
             "&amp"+
