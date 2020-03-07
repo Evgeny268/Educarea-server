@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.io.Serializable;
 import java.time.LocalTime;
+import java.util.Objects;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, property ="type")
 public class Timetable  implements Serializable, Transfers, Comparable<Timetable> {
@@ -51,5 +52,18 @@ public class Timetable  implements Serializable, Transfers, Comparable<Timetable
                 return -1;
             }else return 1;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Timetable)) return false;
+        Timetable timetable = (Timetable) o;
+        return timetableId == timetable.timetableId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(timetableId);
     }
 }

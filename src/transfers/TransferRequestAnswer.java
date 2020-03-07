@@ -2,8 +2,10 @@ package transfers;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import java.io.Serializable;
+
 @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, property ="type")
-public class TransferRequestAnswer implements Transfers {
+public class TransferRequestAnswer implements Serializable, Transfers {
     public String request;
     public String extra;
     public String []extraArr;

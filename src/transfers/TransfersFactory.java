@@ -159,6 +159,33 @@ public class TransfersFactory {
                     return null;
                 }
             }
+            else if (node.get("type").asText().equals("."+VersionInfo.class.getSimpleName())) {
+                try {
+                    VersionInfo out = objectMapper.readValue(jsonString, VersionInfo.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+            else if (node.get("type").asText().equals("."+VersionList.class.getSimpleName())) {
+                try {
+                    VersionList out = objectMapper.readValue(jsonString, VersionList.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+            else if (node.get("type").asText().equals("."+GroupPersonCode.class.getSimpleName())) {
+                try {
+                    GroupPersonCode out = objectMapper.readValue(jsonString, GroupPersonCode.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
             else {
                 return null;
             }
