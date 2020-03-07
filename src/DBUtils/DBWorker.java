@@ -1,9 +1,11 @@
 package DBUtils;
 
 
-import com.educarea.ServerApp.AppContext;
+import com.educarea.ServerApp.EducLogger;
 
 import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DBWorker {
     private static String url = null;
@@ -24,9 +26,11 @@ public class DBWorker {
     protected static boolean alreadyConnect = false;
 
     protected static Connection connection = null;
+    private static Logger log;
 
 
     public static void init(String url, String user, String password){
+        log = Logger.getLogger(EducLogger.class.getName());
         if (alreadyInit) return;
         DBWorker.url = url+settings;
         DBWorker.user = user;
@@ -41,7 +45,7 @@ public class DBWorker {
             connection.setAutoCommit(false);
             alreadyConnect = true;
         } catch (SQLException e) {
-            AppContext.log.severe("can't connect to DB",e);
+            log.log(Level.WARNING, "can't connect to db",e);
             throw e;
         }
     }
@@ -52,6 +56,17 @@ public class DBWorker {
         password = null;
         alreadyInit = false;
         if (!alreadyConnect) return;
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        alreadyConnect = false;
+    }
+
+    public static void disconnect(){
         try {
             connection.close();
         } catch (SQLException e) {
