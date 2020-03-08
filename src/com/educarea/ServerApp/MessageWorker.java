@@ -156,6 +156,14 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                     sendError();
                 }
             }
+            else if (((TransferRequestAnswer) message).request.equals(GET_PERSON_CODE)){
+                try {
+                    getPersonCode((TransferRequestAnswer) message);
+                } catch (Exception e) {
+                    log.log(Level.WARNING, "send channel message error",e);
+                    sendError();
+                }
+            }
         }
         else {
             sendError();

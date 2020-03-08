@@ -44,4 +44,5 @@ public interface TypeRequestAnswer {
     String CREATE_PERSON_CODE = "CREATE_PERSON_CODE";
     String DELETE_PERSON_CODE = "DELETE_PERSON_CODE";
     String INVITE_BY_PERSON_CODE = "INVITE_BY_PERSON_CODE";
+    String GET_PERSON_CODE = "GET_PERSON_CODE";
 }
