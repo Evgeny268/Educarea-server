@@ -795,4 +795,70 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
         }
         return messages;
     }
+
+    @Override
+    public void insertGroupPersonCode(GroupPersonCode groupPersonCode) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+        .setSql("INSERT INTO educarea.group_person_code (group_person_id, code) VALUES (?,?)")
+        .setParameters(String.valueOf(groupPersonCode.groupPersonId), groupPersonCode.code)
+        .setTypes("int","String")){
+            builder.build();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public void deleteGroupPersonCodeByPersonId(int groupPersonId) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+        .setSql("DELETE FROM educarea.group_person_code WHERE group_person_id = ?")
+        .setParameters(String.valueOf(groupPersonId))
+        .setTypes("int")){
+            builder.build();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public GroupPersonCode getGroupPersonCodeByCode(String code) throws Exception {
+        GroupPersonCode groupPersonCode = null;
+        try(DBWorker.Builder builder = new Builder(true)
+        .setSql("SELECT * FROM educarea.group_person_code WHERE BINARY code = ?")
+        .setParameters(code)
+        .setTypes("String")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                groupPersonCode = new GroupPersonCode();
+                groupPersonCode.groupPersonCodeId = resultSet.getInt(1);
+                groupPersonCode.groupPersonId = resultSet.getInt(2);
+                groupPersonCode.code = resultSet.getString(3);
+            }
+        }catch (Exception e){
+            throw e;
+        }
+        return groupPersonCode;
+    }
+
+    @Override
+    public GroupPersonCode getGroupPersonCodeByPersonId(int personId) throws Exception {
+        GroupPersonCode groupPersonCode = null;
+        try(DBWorker.Builder builder = new Builder(true)
+                .setSql("SELECT * FROM educarea.group_person_code WHERE group_person_id = ?")
+                .setParameters(String.valueOf(personId))
+                .setTypes("int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                groupPersonCode = new GroupPersonCode();
+                groupPersonCode.groupPersonCodeId = resultSet.getInt(1);
+                groupPersonCode.groupPersonId = resultSet.getInt(2);
+                groupPersonCode.code = resultSet.getString(3);
+            }
+        }catch (Exception e){
+            throw e;
+        }
+        return groupPersonCode;
+    }
 }

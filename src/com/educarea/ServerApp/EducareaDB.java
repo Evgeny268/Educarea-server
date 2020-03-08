@@ -89,4 +89,12 @@ public interface EducareaDB {
     ArrayList<ChannelMessage> selectChannelMessageByPersonId(int personId, int count) throws Exception;
 
     ArrayList<ChannelMessage> selectChannelMessageByPersonId(int personId, Date lastDate, int count) throws Exception;
+
+    GroupPersonCode getGroupPersonCodeByPersonId(int personId) throws Exception;
+
+    GroupPersonCode getGroupPersonCodeByCode(String code) throws Exception;
+
+    void insertGroupPersonCode(GroupPersonCode groupPersonCode) throws Exception;
+
+    void deleteGroupPersonCodeByPersonId(int groupPersonId) throws Exception;
 }

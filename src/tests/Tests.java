@@ -4,9 +4,13 @@ import DBUtils.DBWorker;
 import DBUtils.EducareaDBWorker;
 import com.educarea.ServerApp.EducareaDB;
 import com.educarea.ServerApp.MessageWorker;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import transfers.User;
+import transfers.VersionInfo;
+import transfers.VersionList;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -76,5 +80,24 @@ public class Tests {
             String token = MessageWorker.generateSafeToken(tokenSize);
             assertTrue(token.length()>=MessageWorker.MIN_TOKEN_LENGTH && token.length()<=MessageWorker.MAX_TOKEN_LENGTH);
         }
+    }
+
+    @Test
+    void createVersionFile() throws IOException {
+        VersionInfo android = new VersionInfo(VersionInfo.PLATFORM_ANDROID,2,"0.0.1",1,"link");
+        VersionInfo ios = new VersionInfo(VersionInfo.PLATFORM_IOS,1,"0.1",1,"google.com");
+        VersionList list = new VersionList();
+        list.versionInfos.add(android);
+        list.versionInfos.add(ios);
+        ObjectMapper objectMapper = new ObjectMapper();
+        StringWriter stringWriter = new StringWriter();
+        objectMapper.writeValue(stringWriter,list);
+        objectMapper.writeValueAsString(list);
+        String data = stringWriter.toString();
+        data = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(list);
+        BufferedWriter writer = new BufferedWriter(new FileWriter("platforms_version"));
+        writer.write(data);
+        writer.close();
+        System.out.println(data);
     }
 }

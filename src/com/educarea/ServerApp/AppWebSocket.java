@@ -6,24 +6,26 @@ import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AppWebSocket extends WebSocketServer {
     private static final Object lock = new Object();
     private static final int TCP_PORT = 4444;
     private HashMap<WebSocket, ClientInfo> clients;// может лучше ConcurrentHashMap и убрать все synchronized?
-    private AppLogger log;
+    private Logger log;
 
     public AppWebSocket() {
         super(new InetSocketAddress(TCP_PORT));
         clients = new HashMap<>();
-        log = AppContext.log;
+        log = Logger.getLogger(EducLogger.class.getName());
     }
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         synchronized (lock){
             clients.put(conn,new ClientInfo());
-            log.info("new connection from "+ conn.getRemoteSocketAddress().getAddress().getHostName());
+            log.log(Level.INFO,"new connection from "+ conn.getRemoteSocketAddress().getAddress().getHostName());
         }
     }
 
@@ -32,7 +34,7 @@ public class AppWebSocket extends WebSocketServer {
         synchronized (lock){
             clients.remove(conn);
         }
-        log.info("close connection "+conn.getRemoteSocketAddress().getAddress().getHostName()+" Clients count = "+clients.size());
+        log.log(Level.INFO,"close connection "+conn.getRemoteSocketAddress().getAddress().getHostName()+" Clients count = "+clients.size());
     }
 
     @Override
