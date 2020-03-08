@@ -76,18 +76,6 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 if (in instanceof GroupPerson){
                     updateGroupPerson((GroupPerson) in);
                 }else sendError();
-            }else if (((TransferRequestAnswer) message).request.equals(INVITE_USER_TO_PERSON)){
-                inviteUser((TransferRequestAnswer) message);
-            }else if (((TransferRequestAnswer) message).request.equals(ACCEPT_INVITE)){
-                acceptInvite((TransferRequestAnswer) message);
-            }else if (((TransferRequestAnswer) message).request.equals(REJECT_INVITE)){
-                rejectInvite((TransferRequestAnswer) message);
-            }else if (((TransferRequestAnswer) message).request.equals(UNTIE_USER)){
-                untieUser((TransferRequestAnswer) message);
-            }else if (((TransferRequestAnswer) message).request.equals(GET_INVITES)){
-                getInvites();
-            }else if (((TransferRequestAnswer) message).request.equals(GET_PERSON_INVITES)){
-                getPersonInvites((TransferRequestAnswer) message);
             }else if (((TransferRequestAnswer) message).request.equals(GET_TIMETABLE)){
                 try {
                     getTimetable((TransferRequestAnswer) message);
@@ -422,7 +410,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
     private void leaveGroup(TransferRequestAnswer transferRequestAnswer){
         int groupId = 0;
         try {
-            groupId = Integer.valueOf(transferRequestAnswer.extra);
+            groupId = Integer.parseInt(transferRequestAnswer.extra);
         }catch (Exception e){
             log.log(Level.WARNING, "error",e);
             sendError();
@@ -623,182 +611,6 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
         }
     }
 
-    private void getInvites(){
-        log.info("get invites "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
-        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
-        int userId = checkAuthorizationGetUserId(clientInfo);
-        try {
-            if (userId != 0) {
-                ArrayList<MyInvite> myInvites = new ArrayList<>();
-                ArrayList<GroupPersonInvite> invites;
-                invites = AppContext.educareaDB.getPersonInviteByUserId(userId);
-                for (int i = 0; i < invites.size(); i++) {
-                    GroupPerson groupPerson = AppContext.educareaDB.getGroupPersonById(invites.get(i).groupPersonId);
-                    Group group = AppContext.educareaDB.getGroupById(groupPerson.groupId);
-                    MyInvite myInvite = new MyInvite(invites.get(i).groupPersonInviteId, group.name, groupPerson);
-                    myInvites.add(myInvite);
-                }
-                MyInvites out = new MyInvites(myInvites);
-                sendTransfers(out);
-            }
-        }catch (Exception e){
-            log.log(Level.WARNING, "error",e);
-            sendError();
-        }
-    }
-
-    private void acceptInvite(TransferRequestAnswer transferRequestAnswer){
-        log.info("accept invites "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
-        int inviteId = 0;
-        try {
-            inviteId = Integer.parseInt(transferRequestAnswer.extra);
-        }catch (Exception e){
-            log.log(Level.WARNING, "error",e);
-            sendError();
-            return;
-        }
-        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
-        int userId = checkAuthorizationGetUserId(clientInfo);
-        if (userId!=0){
-            synchronized (lock) {
-                Savepoint savepoint = null;
-                try {
-                    savepoint = AppContext.educareaDB.setSavepoint("acceptInvite");
-                }catch (Exception e){
-                    log.log(Level.WARNING, "error",e);
-                    sendError();
-                    return;
-                }
-                try {
-                    GroupPersonInvite invite = AppContext.educareaDB.getGroupPersonInviteById(inviteId);
-                    if (userId == invite.userId) {
-                        int groupPersonId = invite.groupPersonId;
-                        GroupPerson groupPerson = AppContext.educareaDB.getGroupPersonById(groupPersonId);
-                        AppContext.educareaDB.removeGroupPersonInvite(inviteId);
-                        groupPerson.userId = userId;
-                        AppContext.educareaDB.updateGroupPerson(groupPersonId, groupPerson);
-                        AppContext.educareaDB.commit();
-                        sendAnswer(UPDATE_INFO);
-                    } else {
-                        sendError();
-                    }
-                }catch (Exception e){
-                    log.log(Level.WARNING, "error",e);
-                    try {
-                        AppContext.educareaDB.rollback(savepoint);
-                    } catch (Exception ex) {
-                        log.log(Level.WARNING, "error",ex);
-                    }
-                    sendError();
-                }
-            }
-        }
-    }
-
-    private void rejectInvite(TransferRequestAnswer transferRequestAnswer){
-        log.info("reject invites"+webSocket.getRemoteSocketAddress().getAddress().getHostName());
-        int inviteId = 0;
-        try {
-            inviteId = Integer.parseInt(transferRequestAnswer.extra);
-        }catch (Exception e){
-            log.log(Level.WARNING, "error",e);
-            sendError();
-            return;
-        }
-        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
-        int userId = checkAuthorizationGetUserId(clientInfo);
-        if (userId!=0){
-            synchronized (lock) {
-                Savepoint savepoint = null;
-                try {
-                    savepoint = AppContext.educareaDB.setSavepoint("rejectInvite");
-                }catch (Exception e){
-                    log.log(Level.WARNING, "error",e);
-                    sendError();
-                    return;
-                }
-                try {
-                    GroupPersonInvite invite = AppContext.educareaDB.getGroupPersonInviteById(inviteId);
-                    if (userId == invite.userId) {
-                        AppContext.educareaDB.removeGroupPersonInvite(inviteId);
-                        AppContext.educareaDB.commit();
-                        sendAnswer(UPDATE_INFO);
-                    } else {
-                        sendError();
-                    }
-                }catch (Exception e){
-                    log.log(Level.WARNING, "error",e);
-                    try {
-                        AppContext.educareaDB.rollback(savepoint);
-                    } catch (Exception ex) {
-                        log.log(Level.WARNING, "error",ex);
-                    }
-                    sendError();
-                }
-            }
-        }
-    }
-
-    private void inviteUser(TransferRequestAnswer transferRequestAnswer){
-        log.info("invite user "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
-        int groupPersonId = Integer.parseInt(transferRequestAnswer.extra);;
-        String login = transferRequestAnswer.extraArr[0];
-        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
-        int userId = checkAuthorizationGetUserId(clientInfo);
-        if (userId!=0){
-            synchronized (lock) {
-                try {
-                    GroupPerson invitePerson = AppContext.educareaDB.getGroupPersonById(groupPersonId);
-                    if (invitePerson.userId!=0){
-                        sendError();
-                        return;
-                    }
-                    ArrayList<GroupPerson> groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(invitePerson.groupId);
-                    if (userInGroup(userId, groupPeople)) {
-                        if (userIsModerator(userId, groupPeople)) {
-                            int inviteUserId = AppContext.educareaDB.getUserIdByLogin(login);
-                            for (int i = 0; i < groupPeople.size(); i++) {
-                                if (groupPeople.get(i).userId == inviteUserId){
-                                    sendError();
-                                    return;
-                                }
-                            }
-                            if (inviteUserId == 0) {
-                                sendAnswer(USER_NOT_EXIST);
-                            } else {
-                                GroupPersonInvite invite = new GroupPersonInvite(groupPersonId, inviteUserId);
-                                Savepoint savepoint = null;
-                                try {
-                                    savepoint = AppContext.educareaDB.setSavepoint("inviteUser");
-                                } catch (Exception e) {
-                                    log.log(Level.WARNING, "error",e);
-                                    sendError();
-                                    return;
-                                }
-                                try {
-                                    AppContext.educareaDB.insertPersonInvite(invite);
-                                    AppContext.educareaDB.commit();
-                                    sendAnswer(UPDATE_INFO);
-                                } catch (Exception e) {
-                                    log.log(Level.WARNING, "error",e);
-                                    try {
-                                        AppContext.educareaDB.rollback(savepoint);
-                                    } catch (Exception ex) {
-                                        log.log(Level.WARNING, "error",ex);
-                                    }
-                                    sendError();
-                                }
-                            }
-                        } else sendAnswer(NO_PERMISSION);
-                    } else sendAnswer(NO_PERMISSION);
-                }catch (Exception e){
-                    log.log(Level.WARNING, "error",e);
-                    sendError();
-                }
-            }
-        }
-    }
-
     private void untieUser(TransferRequestAnswer transferRequestAnswer){
         log.info("untie user "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
         int groupPersonId = Integer.parseInt(transferRequestAnswer.extra);
@@ -828,7 +640,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                             }
                             try {
                                 AppContext.educareaDB.updateGroupPerson(groupPerson.groupPersonId, groupPerson);
-                                AppContext.educareaDB.removeGroupPersonInviteByPersonId(groupPerson.groupPersonId);
+                                AppContext.educareaDB.deleteGroupPersonCodeByPersonId(groupPerson.groupPersonId);
                                 AppContext.educareaDB.commit();
                                 sendAnswer(UPDATE_INFO);
                             } catch (Exception e) {
@@ -846,29 +658,6 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                     log.log(Level.WARNING, "error",e);
                     sendError();
                 }
-            }
-        }
-    }
-
-    private void getPersonInvites(TransferRequestAnswer transferRequestAnswer){
-        log.info("get person invites "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
-        int groupPersonId = Integer.parseInt(transferRequestAnswer.extra);
-        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
-        int userId = checkAuthorizationGetUserId(clientInfo);
-        if (userId!=0){
-            try {
-                GroupPerson groupPerson = AppContext.educareaDB.getGroupPersonById(groupPersonId);
-                ArrayList<GroupPerson> groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(groupPerson.groupId);
-                if (userInGroup(userId, groupPeople)) {
-                    if (userIsModerator(userId, groupPeople)) {
-                        GroupPersonInvite groupPersonInvite = AppContext.educareaDB.getPersonInviteByPersonId(groupPersonId);
-                        sendTransfers(groupPersonInvite);
-                    } else sendAnswer(NO_PERMISSION);
-                } else sendAnswer(NO_PERMISSION);
-            }catch (Exception e){
-                log.log(Level.WARNING, "error",e);
-                sendError();
-                return;
             }
         }
     }
@@ -999,7 +788,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                                     AppContext.educareaDB.updateTimetable(timetable.timetableId, timetable);
                                 }
                             }
-                            AppContext.educareaDB.deletePersonInviteByPersonId(groupPersonId);
+                            AppContext.educareaDB.deleteGroupPersonCodeByPersonId(groupPersonId);
                             AppContext.educareaDB.deleteGroupPersonById(groupPersonId);
                             AppContext.educareaDB.commit();
                             sendAnswer(UPDATE_INFO);

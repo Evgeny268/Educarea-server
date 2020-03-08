@@ -403,51 +403,6 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
     }
 
     @Override
-    public void removeGroupPersonInvite(int inviteId) throws Exception {
-        try(DBWorker.Builder builder = new Builder(false)
-        .setSql("DELETE FROM educarea.group_person_invite WHERE group_person_invite_id = ?")
-        .setParameters(String.valueOf(inviteId))
-        .setTypes("int")){
-            builder.build();
-        }catch (Exception e){
-            throw e;
-        }
-    }
-
-    @Override
-    public void removeGroupPersonInviteByPersonId(int groupPersonId) throws Exception {
-        try(DBWorker.Builder builder = new Builder(false)
-                .setSql("DELETE FROM educarea.group_person_invite WHERE group_person_id = ?")
-                .setParameters(String.valueOf(groupPersonId))
-                .setTypes("int")){
-            builder.build();
-        }catch (Exception e){
-            throw e;
-        }
-    }
-
-    @Override
-    public ArrayList<GroupPersonInvite> getPersonInviteByUserId(int userId) throws Exception {
-        ArrayList<GroupPersonInvite> invites = new ArrayList<>();
-        try(DBWorker.Builder builder = new Builder(true)
-        .setSql("SELECT * FROM group_person_invite WHERE user_id = ?")
-        .setParameters(String.valueOf(userId))
-        .setTypes("int")){
-            builder.build();
-            ResultSet resultSet = builder.getResultSet();
-            while (resultSet.next()){
-                int inviteId = resultSet.getInt(1);
-                int personId = resultSet.getInt(2);
-                GroupPersonInvite gpinvite = new GroupPersonInvite(inviteId,personId,userId);
-                invites.add(gpinvite);
-            }
-        }catch (Exception e){
-            throw e;
-        }
-        return invites;
-    }
-
-    @Override
     public GroupPerson getGroupPersonById(int groupPersonId) throws Exception {
         GroupPerson groupPerson = new GroupPerson();
         try(DBWorker.Builder builder = new Builder(true)
@@ -471,60 +426,6 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
             throw e;
         }
         return groupPerson;
-    }
-
-    @Override
-    public GroupPersonInvite getGroupPersonInviteById(int groupPersonInviteId) throws Exception {
-        GroupPersonInvite groupPersonInvite = new GroupPersonInvite();
-        try(DBWorker.Builder builder = new Builder(true)
-        .setSql("SELECT * FROM educarea.group_person_invite WHERE group_person_invite_id = ?")
-        .setParameters(String.valueOf(groupPersonInviteId))
-        .setTypes("int")){
-            builder.build();
-            ResultSet resultSet = builder.getResultSet();
-            while (resultSet.next()){
-                groupPersonInvite = new GroupPersonInvite(0,0,0);
-                groupPersonInvite.groupPersonInviteId = resultSet.getInt(1);
-                groupPersonInvite.groupPersonId = resultSet.getInt(2);
-                groupPersonInvite.userId = resultSet.getInt(3);
-            }
-        }catch (Exception e){
-            throw e;
-        }
-        return groupPersonInvite;
-    }
-
-    @Override
-    public GroupPersonInvite getPersonInviteByPersonId(int groupPersonId) throws Exception {
-        GroupPersonInvite groupPersonInvite = new GroupPersonInvite();
-        try(DBWorker.Builder builder = new Builder(true)
-                .setSql("SELECT * FROM educarea.group_person_invite WHERE group_person_id = ?")
-                .setParameters(String.valueOf(groupPersonId))
-                .setTypes("int")){
-            builder.build();
-            ResultSet resultSet = builder.getResultSet();
-            while (resultSet.next()){
-                groupPersonInvite = new GroupPersonInvite();
-                groupPersonInvite.groupPersonInviteId = resultSet.getInt(1);
-                groupPersonInvite.groupPersonId = resultSet.getInt(2);
-                groupPersonInvite.userId = resultSet.getInt(3);
-            }
-        }catch (Exception e){
-            throw e;
-        }
-        return groupPersonInvite;
-    }
-
-    @Override
-    public void insertPersonInvite(GroupPersonInvite invite) throws Exception {
-        try(DBWorker.Builder builder = new Builder(false)
-        .setSql("INSERT INTO educarea.group_person_invite (group_person_id, user_id) VALUES (?,?)")
-        .setParameters(String.valueOf(invite.groupPersonId),String.valueOf(invite.userId))
-        .setTypes("int","int")){
-            builder.build();
-        }catch (Exception e){
-            throw e;
-        }
     }
 
     @Override

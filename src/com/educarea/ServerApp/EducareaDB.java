@@ -58,19 +58,7 @@ public interface EducareaDB {
 
     void updateGroupPerson(int groupPersonId, GroupPerson groupPerson) throws Exception;
 
-    void insertPersonInvite(GroupPersonInvite invite) throws Exception;
-
     void deletePersonInviteByPersonId(int groupPersonId) throws Exception;
-
-    ArrayList<GroupPersonInvite> getPersonInviteByUserId(int userId) throws Exception;
-
-    GroupPersonInvite getPersonInviteByPersonId(int groupPersonId) throws Exception;
-
-    GroupPersonInvite getGroupPersonInviteById(int groupPersonInviteId) throws Exception;
-
-    void removeGroupPersonInvite(int inviteId) throws Exception;
-
-    void removeGroupPersonInviteByPersonId(int groupPersonId) throws Exception;
 
     void insertTimetable(Timetable timetable) throws Exception;
 
