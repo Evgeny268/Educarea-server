@@ -951,6 +951,10 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 int userPersonId = LogicUtils.getGroupPersonIdByUserId(userId, person.groupId);
                 if (userPersonId!=0) {
                     if (LogicUtils.groupPersonIsModerator(userPersonId)) {
+                        if (person.userId!=0){ //user already bind to this person
+                            sendError();
+                            return;
+                        }
                         GroupPersonCode oldCode = AppContext.educareaDB.getGroupPersonCodeByPersonId(personId);
                         if (oldCode==null){
                             int startCodeSize = 6;
