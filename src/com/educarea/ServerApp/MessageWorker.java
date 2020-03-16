@@ -1002,8 +1002,16 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
             int userPersonId = LogicUtils.getGroupPersonIdByUserId(userId, person.groupId);
             if (userPersonId!=0){
                 if (LogicUtils.groupPersonIsModerator(userPersonId)){
-                    GroupPersonCode code = AppContext.educareaDB.getGroupPersonCodeByPersonId(personId);
-                    sendTransfers(code);
+                    if (person.userId!=0){
+                        sendAnswer(USER_ALREADY_BIND);
+                    }else {
+                        GroupPersonCode code = AppContext.educareaDB.getGroupPersonCodeByPersonId(personId);
+                        if (code==null){
+                            sendAnswer(NO_PERSON_CODE);
+                        }else {
+                            sendTransfers(code);
+                        }
+                    }
                 }else sendAnswer(NO_PERMISSION);
             }else sendAnswer(NO_PERMISSION);
         }
