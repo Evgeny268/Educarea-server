@@ -1,0 +1,18 @@
+{
+  "type" : ".VersionList",
+  "versionInfos" : [ {
+    "type" : ".VersionInfo",
+    "platformName" : "ANDROID",
+    "lastVersionId" : 4,
+    "lastVersionName" : "0.0.4",
+    "supportedVersionId" : 2,
+    "updateLink" : "https://drive.google.com/open?id=1yOWmIlftFIyFA6asGIp5RMDa-SsITTXW"
+  }, {
+    "type" : ".VersionInfo",
+    "platformName" : "IOS",
+    "lastVersionId" : 1,
+    "lastVersionName" : "0.1",
+    "supportedVersionId" : 1,
+    "updateLink" : "google.com"
+  } ]
+}

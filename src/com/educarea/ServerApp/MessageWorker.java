@@ -492,9 +492,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 return;
             }
             if (userInGroup(userId, groupPeople)){
-                if (!userIsModerator(userId, groupPeople)){
-                    deleteUserIdInfo(userId,groupPeople);
-                }
+                deleteUserIdInfo(userId,groupPeople);
                 GroupPersons out = new GroupPersons(groupPeople);
                 sendTransfers(out);
                 log.info("getGroupPerson "+webSocket.getRemoteSocketAddress().getAddress().getHostName());
