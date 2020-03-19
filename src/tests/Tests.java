@@ -6,9 +6,7 @@ import com.educarea.ServerApp.EducareaDB;
 import com.educarea.ServerApp.MessageWorker;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import transfers.User;
-import transfers.VersionInfo;
-import transfers.VersionList;
+import transfers.*;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -98,6 +96,15 @@ public class Tests {
         BufferedWriter writer = new BufferedWriter(new FileWriter("platforms_version"));
         writer.write(data);
         writer.close();
+        System.out.println(data);
+    }
+
+    @Test
+    void jsonTest() throws Exception{
+        Transfers transfers = new TransferRequestAnswer();
+        ObjectMapper objectMapper = new ObjectMapper();
+        StringWriter stringWriter = new StringWriter();
+        String data = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(transfers);
         System.out.println(data);
     }
 }
