@@ -2,6 +2,7 @@ package com.educarea.ServerApp;
 
 import DBUtils.DBWorker;
 import DBUtils.EducareaDBWorker;
+import com.educarea.ServerApp.firebase.FirebaseUtils;
 import transfers.VersionList;
 
 import java.io.IOException;
@@ -42,6 +43,7 @@ public class AppContext {
             log.log(Level.SEVERE,"can't connect to database",e);
             System.exit(-1);
         }
+        FirebaseUtils.init(propLoader.getFirebaseAccountKeyJSONPath(),propLoader.getFirebaseDatabaseUrl());
         educareaDB = EducareaDBWorker.getInstance();
         appWebSocket = new AppWebSocket();
         selfControl = new SelfControl();

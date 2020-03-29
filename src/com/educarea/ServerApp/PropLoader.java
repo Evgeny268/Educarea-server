@@ -13,6 +13,8 @@ public class PropLoader {
     private String password;
     private String logSetting;
     private String platformsVersionFilePath;
+    private String firebaseAccountKeyJSONPath;
+    private String firebaseDatabaseUrl;
 
     public PropLoader(String propPath) {
         this.propPath = propPath;
@@ -27,6 +29,8 @@ public class PropLoader {
             password = property.getProperty("db.password");
             logSetting = property.getProperty("log.file");
             platformsVersionFilePath = property.getProperty("platforms.version");
+            firebaseAccountKeyJSONPath = property.getProperty("firebaseAccountKeyJSONPath");
+            firebaseDatabaseUrl = property.getProperty("firebaseDatabaseUrl");
         }catch (Exception e){
             System.err.println("Can't load property file");
             restoreProperty();
@@ -41,6 +45,8 @@ public class PropLoader {
         props.setProperty("db.password","");
         props.setProperty("log.file","");
         props.setProperty("platforms.version","");
+        props.setProperty("firebaseAccountKeyJSONPath","");
+        props.setProperty("firebaseDatabaseUrl","");
         try {
             props.store(new FileOutputStream(new File(propPath)), "create new prop file");
         }catch (Exception e){
@@ -66,5 +72,13 @@ public class PropLoader {
 
     public String getPlatformsVersionFilePath() {
         return platformsVersionFilePath;
+    }
+
+    public String getFirebaseAccountKeyJSONPath() {
+        return firebaseAccountKeyJSONPath;
+    }
+
+    public String getFirebaseDatabaseUrl() {
+        return firebaseDatabaseUrl;
     }
 }
