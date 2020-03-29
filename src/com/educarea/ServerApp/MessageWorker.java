@@ -25,6 +25,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
     public static final int MIN_TOKEN_LENGTH = 128;
     public static final int MAX_TOKEN_LENGTH = 200;
     public static final int MAX_TRY_CONNECT_WRONG_TOKEN = 5;
+    public static final int PERSON_CODE_START_SIZE = 8;
 
     private Logger log;
 
@@ -147,6 +148,14 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
             else if (((TransferRequestAnswer) message).request.equals(GET_PERSON_CODE)){
                 try {
                     getPersonCode((TransferRequestAnswer) message);
+                } catch (Exception e) {
+                    log.log(Level.WARNING, "send channel message error",e);
+                    sendError();
+                }
+            }
+            else if (((TransferRequestAnswer) message).request.equals(UNBIND_USER)){
+                try {
+                    untieUser((TransferRequestAnswer) message);
                 } catch (Exception e) {
                     log.log(Level.WARNING, "send channel message error",e);
                     sendError();
@@ -955,7 +964,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                         }
                         GroupPersonCode oldCode = AppContext.educareaDB.getGroupPersonCodeByPersonId(personId);
                         if (oldCode==null){
-                            int startCodeSize = 6;
+                            int startCodeSize = PERSON_CODE_START_SIZE;
                             String newCode = null;
                             while (true){
                                 newCode = generateSafeToken(startCodeSize);

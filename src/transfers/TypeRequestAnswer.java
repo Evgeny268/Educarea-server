@@ -40,5 +40,6 @@ public interface TypeRequestAnswer {
     String INVITE_BY_PERSON_CODE = "INVITE_BY_PERSON_CODE";
     String GET_PERSON_CODE = "GET_PERSON_CODE";
     String USER_ALREADY_BIND = "USER_ALREADY_BIND";
+    String UNBIND_USER = "UNBIND_USER";
     String NO_PERSON_CODE = "NO_PERSON_CODE";
 }

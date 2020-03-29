@@ -814,3 +814,583 @@ com.educarea.ServerApp.AppWebSocket onClose
 com.educarea.ServerApp.EducLogger init
 [2020-03-08 15:52:23] [INFO   ]  start self control
 com.educarea.ServerApp.SelfControl run
+[2020-03-19 20:31:38] [INFO   ]  ################### LOGGER START ######################
+com.educarea.ServerApp.EducLogger init
+[2020-03-19 20:31:40] [INFO   ]  start self control
+com.educarea.ServerApp.SelfControl run
+[2020-03-19 20:32:49] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-19 20:32:53] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-19 20:32:53] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:32:54] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-19 20:32:54] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:32:55] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:32:55] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:32:58] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:33:36] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-19 20:36:25] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-19 20:36:27] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-19 20:36:27] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:36:27] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:36:27] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-19 20:36:28] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:36:28] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:36:31] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:37:01] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-19 20:39:12] [INFO   ]  ################### LOGGER START ######################
+com.educarea.ServerApp.EducLogger init
+[2020-03-19 20:39:13] [INFO   ]  start self control
+com.educarea.ServerApp.SelfControl run
+[2020-03-19 20:40:10] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-19 20:40:13] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-19 20:40:14] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:40:14] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-19 20:40:14] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:40:17] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:40:17] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:40:29] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:40:38] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:40:59] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:41:20] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-19 20:41:27] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-19 20:41:28] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-19 20:41:28] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:41:29] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-19 20:41:29] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:41:30] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:41:30] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:41:31] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:41:50] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-19 20:46:14] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-19 20:46:18] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-19 20:46:18] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:46:18] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:46:18] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-19 20:46:19] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:46:19] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:46:21] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:46:27] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-19 20:46:40] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-19 20:46:43] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-19 20:46:43] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:46:43] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-19 20:46:43] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:46:45] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:46:45] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:46:46] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:46:51] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-19 20:50:47] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-19 20:50:50] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-19 20:50:51] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:50:51] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:50:51] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-19 20:50:53] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:50:53] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:50:55] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:51:38] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-19 20:51:58] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-19 20:52:00] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-19 20:52:00] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:52:01] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-19 20:52:01] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:52:04] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:52:04] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:52:08] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:52:13] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:52:32] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-19 20:53:11] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-19 20:53:13] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-19 20:53:13] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:53:13] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:53:13] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-19 20:53:14] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:53:14] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:53:16] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:53:22] [INFO   ]  untie user DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker untieUser
+[2020-03-19 20:53:24] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:54:27] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:54:30] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-19 20:54:45] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-19 20:54:47] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-19 20:54:47] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:54:47] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 20:54:47] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-19 20:55:09] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-19 20:55:17] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-19 20:55:52] [INFO   ]  new AUTHENTICATION DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authentication
+[2020-03-19 20:55:54] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-19 20:55:54] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:56:04] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 20:56:17] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-19 21:02:17] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-19 21:02:18] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-19 21:02:18] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 21:02:36] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-19 21:03:08] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-19 21:03:13] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-19 21:03:13] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 21:03:30] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-19 21:03:58] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-19 21:04:03] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-19 21:04:03] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 21:04:19] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 21:04:19] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 21:04:19] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-19 21:04:24] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 21:04:24] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 21:04:26] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 21:04:30] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 21:04:32] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 21:04:43] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 21:04:45] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 21:07:29] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-19 21:15:46] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-19 21:15:48] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-19 21:15:48] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-19 21:15:48] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-19 21:15:48] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-19 21:15:58] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-20 22:45:01] [INFO   ]  ################### LOGGER START ######################
+com.educarea.ServerApp.EducLogger init
+[2020-03-20 22:45:03] [INFO   ]  start self control
+com.educarea.ServerApp.SelfControl run
+[2020-03-20 22:46:10] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-20 22:46:22] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-20 22:46:22] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:46:23] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-20 22:46:23] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:46:31] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:46:31] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:46:31] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-20 22:46:33] [INFO   ]  leave group DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker leaveGroup
+[2020-03-20 22:46:33] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:47:35] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-20 22:47:42] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-20 22:48:33] [INFO   ]  new AUTHENTICATION DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authentication
+[2020-03-20 22:48:35] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-20 22:48:35] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:48:35] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:48:35] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-20 22:48:37] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:48:37] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:48:40] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-20 22:48:52] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-20 22:49:32] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-20 22:49:34] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-20 22:49:34] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:49:34] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:49:34] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-20 22:49:36] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:49:36] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:49:40] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:49:43] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:49:43] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:49:59] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:49:59] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:49:59] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-20 22:50:05] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:50:06] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:50:06] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-20 22:50:07] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:50:07] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:50:10] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:50:31] [INFO   ]  update group person DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker updateGroupPerson
+[2020-03-20 22:50:31] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:50:38] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:50:47] [INFO   ]  create group person DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker createGroupPerson
+[2020-03-20 22:50:47] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:50:51] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:50:51] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:50:54] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-20 22:50:55] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-20 22:51:47] [INFO   ]  timetable editDESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker timetableEdit
+[2020-03-20 22:51:47] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-20 22:51:50] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:51:50] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:51:51] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-20 22:51:59] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:51:59] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:52:05] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:52:05] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:52:05] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-20 22:52:07] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:52:07] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:52:53] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:52:53] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:53:14] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:53:14] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:53:18] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:53:34] [INFO   ]  create group person DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker createGroupPerson
+[2020-03-20 22:53:35] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:54:20] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:54:31] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-20 22:54:36] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-20 22:55:07] [INFO   ]  new AUTHENTICATION DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authentication
+[2020-03-20 22:55:09] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-20 22:55:09] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:55:26] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:55:26] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:55:26] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-20 22:55:28] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:55:28] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:55:32] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:55:38] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:55:38] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:55:45] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:55:45] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:56:36] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:56:36] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:58:30] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-20 22:58:30] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-20 22:58:30] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-20 22:59:38] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-29 16:48:33] [INFO   ]  ################### LOGGER START ######################
+com.educarea.ServerApp.EducLogger init
+[2020-03-29 16:48:36] [INFO   ]  start self control
+com.educarea.ServerApp.SelfControl run
+[2020-03-29 16:48:50] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-29 16:49:32] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-29 16:49:33] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-29 16:49:33] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-29 16:49:33] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 16:49:36] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-29 16:49:36] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 16:49:37] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-29 16:49:38] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-29 16:49:38] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 16:49:39] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 16:49:45] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 16:50:02] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-29 16:50:02] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 16:50:45] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-29 16:50:46] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 16:50:46] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-29 16:50:49] [INFO   ]  leave group DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker leaveGroup
+[2020-03-29 16:50:49] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-29 16:50:54] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-29 16:51:05] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-29 16:51:06] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-29 16:51:10] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-29 16:51:40] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-29 17:03:01] [INFO   ]  new AUTHENTICATION DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authentication
+[2020-03-29 17:03:04] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-29 17:03:04] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-29 17:03:04] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 17:03:04] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-29 17:03:06] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-29 17:03:06] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 17:03:07] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 17:03:11] [INFO   ]  untie user DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker untieUser
+[2020-03-29 17:03:12] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 17:03:20] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 17:03:34] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 17:03:40] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 17:03:50] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 17:03:56] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 17:04:46] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 17:06:50] [INFO   ]  ################### LOGGER START ######################
+com.educarea.ServerApp.EducLogger init
+[2020-03-29 17:06:50] [INFO   ]  start self control
+com.educarea.ServerApp.SelfControl run
+[2020-03-29 17:06:51] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-29 17:06:51] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-29 17:07:54] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 17:08:07] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-29 17:08:12] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-29 17:08:31] [INFO   ]  new AUTHENTICATION DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authentication
+[2020-03-29 17:08:32] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-29 17:08:32] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-29 17:08:42] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-29 17:08:50] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-29 17:08:56] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-29 17:08:56] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 17:08:56] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-29 17:10:14] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
+[2020-03-29 17:10:48] [INFO   ]  new connection from DESKTOP-6OFHQQ7
+com.educarea.ServerApp.AppWebSocket onOpen
+[2020-03-29 17:11:08] [INFO   ]  new AUTHENTICATION DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authentication
+[2020-03-29 17:11:10] [INFO   ]  AUTHORIZATION_DONE DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker authorization
+[2020-03-29 17:11:10] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-29 17:11:10] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 17:11:10] [INFO   ]  get timetable DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getTimetable
+[2020-03-29 17:11:14] [INFO   ]  getMyGroup DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getMyGroup
+[2020-03-29 17:11:14] [INFO   ]  getGroupPerson DESKTOP-6OFHQQ7
+com.educarea.ServerApp.MessageWorker getGroupPersons
+[2020-03-29 17:11:18] [INFO   ]  close connection DESKTOP-6OFHQQ7 Clients count = 0
+com.educarea.ServerApp.AppWebSocket onClose
