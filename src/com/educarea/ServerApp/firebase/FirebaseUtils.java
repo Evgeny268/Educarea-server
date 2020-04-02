@@ -18,7 +18,6 @@ public class FirebaseUtils {
     public static void init(String filePathToJSONFirebase, String firebaseDatabaseUser){
         log = Logger.getLogger(EducLogger.class.getName());
         try {
-            FirebaseUtils firebaseUtils = new FirebaseUtils();
             FileInputStream serviceAccount =
                     new FileInputStream(filePathToJSONFirebase);
 

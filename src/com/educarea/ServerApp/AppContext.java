@@ -2,6 +2,7 @@ package com.educarea.ServerApp;
 
 import DBUtils.DBWorker;
 import DBUtils.EducareaDBWorker;
+import com.educarea.ServerApp.Console.ConsoleWorker;
 import com.educarea.ServerApp.firebase.FirebaseUtils;
 import transfers.VersionList;
 
@@ -18,11 +19,12 @@ public class AppContext {
     public static AppWebSocket appWebSocket = null;
     private static VersionList versionList = null;
     private static SelfControl selfControl;
+    private static PropLoader propLoader = null;
 
     public static final Object appConLock = new Object();
 
     public static void appInit(){
-        PropLoader propLoader = new PropLoader(propPath);
+        propLoader = new PropLoader(propPath);
         propLoader.load();
         EducLogger logger = new EducLogger(propLoader.getLogSetting());
         if(!((EducLogger) logger).init()){
@@ -49,11 +51,21 @@ public class AppContext {
         selfControl = new SelfControl();
         selfControl.start();
         appWebSocket.start();
+        ConsoleWorker.init();
+        ConsoleWorker.start();
     }
 
     public static VersionList getVersionList() {
         synchronized (appConLock) {
             return versionList;
         }
+    }
+
+    public static void setVersionList(VersionList versionList) {
+        AppContext.versionList = versionList;
+    }
+
+    public static PropLoader getPropLoader() {
+        return propLoader;
     }
 }

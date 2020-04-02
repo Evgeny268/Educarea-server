@@ -36,6 +36,8 @@ public interface EducareaDB {
 
     User getUserById(int userId) throws Exception;
 
+    ArrayList<UserTokens> getUserTokensByUserId(int userId) throws Exception;
+
     void insertNewUser(User user) throws Exception;
 
     void insertNewGroup(String name) throws Exception;
@@ -85,4 +87,6 @@ public interface EducareaDB {
     void insertGroupPersonCode(GroupPersonCode groupPersonCode) throws Exception;
 
     void deleteGroupPersonCodeByPersonId(int groupPersonId) throws Exception;
+
+    void deleteOldTokens(int userId, int liveTokenCount) throws Exception;
 }

@@ -698,6 +698,47 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
     }
 
     @Override
+    public ArrayList<UserTokens> getUserTokensByUserId(int userId) throws Exception {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        ArrayList<UserTokens> list = new ArrayList<>();
+        try(DBWorker.Builder builder = new Builder(true)
+        .setSql("SELECT * FROM educarea.user_tokens WHERE user_id = ?")
+        .setParameters(String.valueOf(userId))
+        .setTypes("int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                UserTokens userTokens = new UserTokens();
+                userTokens.userTokensId = resultSet.getInt(1);
+                userTokens.userId = resultSet.getInt(2);
+                userTokens.authToken = resultSet.getString(3);
+                userTokens.cloudToken = resultSet.getString(4);
+                String sDate = resultSet.getString(5);
+                Date date = format.parse(sDate);
+                userTokens.lastDate = date;
+                userTokens.ipAddress = resultSet.getString(6);
+                list.add(userTokens);
+            }
+        }catch (Exception e){
+            throw e;
+        }
+        return list;
+    }
+
+    @Override
+    public void deleteOldTokens(int userId, int liveTokenCount) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+        .setSql("delete from educarea.user_tokens where user_id = ? and last_date < (select a.last_date from (select last_date from educarea.user_tokens where user_id = ? order by last_date desc limit 1 offset ?) as a)")
+        .setParameters(String.valueOf(userId), String.valueOf(userId), String.valueOf(liveTokenCount))
+        .setTypes("int","int","int")){
+            builder.build();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
     public void insertGroupPersonCode(GroupPersonCode groupPersonCode) throws Exception {
         try(DBWorker.Builder builder = new Builder(false)
         .setSql("INSERT INTO educarea.group_person_code (group_person_id, code) VALUES (?,?)")

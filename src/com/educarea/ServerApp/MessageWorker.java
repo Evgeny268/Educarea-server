@@ -1,5 +1,6 @@
 package com.educarea.ServerApp;
 
+import com.educarea.ServerApp.firebase.CloudMessageSender;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.java_websocket.WebSocket;
 import transfers.*;
@@ -26,6 +27,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
     public static final int MAX_TOKEN_LENGTH = 200;
     public static final int MAX_TRY_CONNECT_WRONG_TOKEN = 5;
     public static final int PERSON_CODE_START_SIZE = 8;
+    public static final int LIVE_TOKEN_COUNT = 5;
 
     private Logger log;
 
@@ -895,6 +897,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                     return;
                 }
                 sendToAllGroupUsers(new TransferRequestAnswer(NEW_CHANNEL_MESSAGE),groupId);
+                CloudMessageSender.channelMessage(groupId,groupPerson.groupPersonId,message);
             }
         }
     }
@@ -1234,6 +1237,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 User user = AppContext.educareaDB.getUserById(userId);
                 AppContext.educareaDB.updateTokenTime(token);
                 AppContext.educareaDB.updateTokenAddress(token, webSocket.getRemoteSocketAddress().getAddress().getHostName());
+                AppContext.educareaDB.deleteOldTokens(userId,LIVE_TOKEN_COUNT);
                 if (cloudToken != null) {
                     AppContext.educareaDB.updateCloudToken(token, cloudToken);
                 }

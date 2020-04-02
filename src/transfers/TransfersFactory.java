@@ -186,6 +186,15 @@ public class TransfersFactory {
                     return null;
                 }
             }
+            else if (node.get("type").asText().equals("."+UserTokens.class.getSimpleName())) {
+                try {
+                    UserTokens out = objectMapper.readValue(jsonString, UserTokens.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
             else {
                 return null;
             }
