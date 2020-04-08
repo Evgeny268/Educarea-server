@@ -34,7 +34,7 @@ public class SelfControl extends Thread {
         .setSql("SELECT ? FROM educarea.user")
         .setParameters(String.valueOf(1))
         .setTypes("int")){
-
+            builder.build();
         }catch (Exception e){
             log.log(Level.SEVERE,"problem with database, try to reconnect",e);
             DBWorker.disconnect();
