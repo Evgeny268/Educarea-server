@@ -5,19 +5,20 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class AppWebSocket extends WebSocketServer {
     private static final Object lock = new Object();
     private static final int TCP_PORT = 4444;
-    private HashMap<WebSocket, ClientInfo> clients;// может лучше ConcurrentHashMap и убрать все synchronized?
+    private Map<WebSocket, ClientInfo> clients;// может лучше ConcurrentHashMap и убрать все synchronized?
     private Logger log;
 
     public AppWebSocket() {
         super(new InetSocketAddress(TCP_PORT));
-        clients = new HashMap<>();
+        clients = new ConcurrentHashMap<>();
         log = Logger.getLogger(EducLogger.class.getName());
     }
 
@@ -39,7 +40,7 @@ public class AppWebSocket extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        System.out.println(message);
+        //System.out.println(message);
         MessageWorker messageWorker = new MessageWorker(conn,message);
         Thread thread = new Thread(messageWorker);
         thread.start();
@@ -55,7 +56,7 @@ public class AppWebSocket extends WebSocketServer {
 
     }
 
-    public HashMap<WebSocket, ClientInfo> getClients(){
+    public Map<WebSocket, ClientInfo> getClients(){
         return clients;
     }
 
