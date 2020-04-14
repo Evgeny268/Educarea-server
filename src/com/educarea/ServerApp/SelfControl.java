@@ -30,7 +30,7 @@ public class SelfControl extends Thread {
     }
 
     private void checkDB(){
-        try(DBWorker.Builder builder = new DBWorker.Builder(false)
+        try(DBWorker.Builder builder = new DBWorker.Builder(true)
         .setSql("SELECT ? FROM educarea.user")
         .setParameters(String.valueOf(1))
         .setTypes("int")){
