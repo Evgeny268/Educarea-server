@@ -60,13 +60,13 @@ public interface EducareaDB {
 
     void updateGroupPerson(int groupPersonId, GroupPerson groupPerson) throws Exception;
 
-    void deletePersonInviteByPersonId(int groupPersonId) throws Exception;
-
     void insertTimetable(Timetable timetable) throws Exception;
 
     void updateTimetable(int timetableId, Timetable timetable) throws Exception;
 
     void deleteTimetable(int timetableId) throws Exception;
+
+    void deleteTimetableByGroupId(int groupId) throws Exception;
 
     Timetable getTimetableById(int timetableId) throws Exception;
 
@@ -80,6 +80,8 @@ public interface EducareaDB {
 
     ArrayList<ChannelMessage> selectChannelMessageByPersonId(int personId, Date lastDate, int count) throws Exception;
 
+    void deleteChannelMessageByPersonId(int personId) throws Exception;
+
     GroupPersonCode getGroupPersonCodeByPersonId(int personId) throws Exception;
 
     GroupPersonCode getGroupPersonCodeByCode(String code) throws Exception;
@@ -89,4 +91,6 @@ public interface EducareaDB {
     void deleteGroupPersonCodeByPersonId(int groupPersonId) throws Exception;
 
     void deleteOldTokens(int userId, int liveTokenCount) throws Exception;
+
+    void deleteTokenByCloudToken(String cloudToken) throws Exception;
 }

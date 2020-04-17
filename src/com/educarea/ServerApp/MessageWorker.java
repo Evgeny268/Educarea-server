@@ -77,7 +77,13 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
             }else if (((TransferRequestAnswer) message).request.equals(UPDATE_PERSON)){
                 Transfers in = TransfersFactory.createFromJSON(((TransferRequestAnswer) message).extra);
                 if (in instanceof GroupPerson){
-                    updateGroupPerson((GroupPerson) in);
+                    try {
+                        updateGroupPerson((GroupPerson) in);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        log.log(Level.WARNING, "updateGroupPerson error",e);
+                        sendError();
+                    }
                 }else sendError();
             }else if (((TransferRequestAnswer) message).request.equals(GET_TIMETABLE)){
                 try {
@@ -567,28 +573,32 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
         }
     }
 
-    private void updateGroupPerson(GroupPerson groupPerson){
+    private void updateGroupPerson(GroupPerson groupPerson) throws Exception{
         int groupId = groupPerson.groupId;
         ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
         int userId = checkAuthorizationGetUserId(clientInfo);
         if (userId!=0){
             synchronized (lock){
                 ArrayList<GroupPerson> groupPeople = null;
-                try {
-                    groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(groupId);
-                    GroupPerson oldGroupPerson = AppContext.educareaDB.getGroupPersonById(groupPerson.groupPersonId);
-                    groupPerson.userId = oldGroupPerson.userId;
-                } catch (Exception e) {
-                    log.log(Level.WARNING, "error",e);
-                    sendError();
-                    return;
+                boolean emptyName = false;
+                groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(groupId);
+                GroupPerson oldGroupPerson = AppContext.educareaDB.getGroupPersonById(groupPerson.groupPersonId);
+                int groupPersonSenderId = LogicUtils.getGroupPersonIdByUserId(userId, oldGroupPerson.groupId);
+                GroupPerson groupPersonSender = AppContext.educareaDB.getGroupPersonById(groupPersonSenderId);
+                groupPerson.userId = oldGroupPerson.userId;
+                if (oldGroupPerson.name==null && oldGroupPerson.surname==null && oldGroupPerson.patronymic==null) {
+                    emptyName = true;
                 }
                 if (userInGroup(userId, groupPeople) && personInGroup(groupPerson.groupPersonId, groupPeople)){
-                    if (userIsModerator(userId, groupPeople)){
+                    if (userIsModerator(userId, groupPeople) || emptyName){
                         if (checkNewGroupPesron(groupPerson)) {
-                            if (lifeModeratorCount(groupPeople)==1 && groupPerson.moderator==0 && groupPerson.userId==userId){
+                            if (lifeModeratorCount(groupPeople)==1 && groupPerson.moderator==0 && groupPerson.userId==userId && oldGroupPerson.moderator==1){
                                 sendAnswer(NO_PERMISSION);
                                 return;
+                            }
+                            if (groupPersonSender.moderator==0){
+                                groupPerson.personType=oldGroupPerson.personType;
+                                groupPerson.moderator=0;
                             }
                             Savepoint savepoint = null;
                             try {
@@ -676,53 +686,54 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
         ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
         int userId = checkAuthorizationGetUserId(clientInfo);
         if (userId!=0){
-            synchronized (lock) {
-                if (checkTimetable(timetable)) {
-                    ArrayList<GroupPerson> groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(timetable.groupId);
-                    if (userInGroup(userId, groupPeople)) {
-                        if (userIsModerator(userId, groupPeople)) {
-                            if (timetable.groupPersonId != 0) {
-                                GroupPerson teacher = AppContext.educareaDB.getGroupPersonById(timetable.groupPersonId);
-                                if ((teacher.groupId != timetable.groupId) || teacher.personType == 0) {
-                                    sendAnswer(NO_PERMISSION);
-                                    return;
-                                }
+            synchronized (lock){
+                if (checkTimetable(timetable)){
+                    int userPersonId = LogicUtils.getGroupPersonIdByUserId(userId, timetable.groupId);
+                    if (userPersonId!=0){ //if user have account in group
+                        GroupPerson person = AppContext.educareaDB.getGroupPersonById(userPersonId);
+                        if (timetable.groupPersonId!=0){ //if timetable has a teacher
+                            GroupPerson teacher = AppContext.educareaDB.getGroupPersonById(timetable.groupPersonId);
+                            if (timetable.groupId!=teacher.groupId || teacher.personType==0){ //if teacher is in a different group or not teacher
+                                sendAnswer(NO_PERMISSION);
+                                return;
                             }
-                                if (timetable.timetableId != 0) {
-                                    Timetable oldTimeTable = AppContext.educareaDB.getTimetableById(timetable.timetableId);
-                                    if (oldTimeTable.groupId != timetable.groupId) {
-                                        sendAnswer(NO_PERMISSION);
-                                        return;
-                                    }
-                                }
-                                Savepoint savepoint = null;
-                                try {
-                                    savepoint = AppContext.educareaDB.setSavepoint("timetableEdit");
-                                } catch (Exception e) {
-                                    log.log(Level.WARNING, "error",e);
-                                    sendError();
-                                    return;
-                                }
-                                try {
-                                    if (timetable.timetableId != 0) {
-                                        AppContext.educareaDB.updateTimetable(timetable.timetableId, timetable);
-                                    } else {
-                                        AppContext.educareaDB.insertTimetable(timetable);
-                                    }
-                                    AppContext.educareaDB.commit();
-                                    sendAnswer(UPDATE_INFO);
-                                } catch (Exception e) {
-                                    log.log(Level.WARNING, "error",e);
-                                    try {
-                                        AppContext.educareaDB.rollback(savepoint);
-                                    } catch (Exception ex) {
-                                        log.log(Level.WARNING, "error",ex);
-                                    }
-                                    sendError();
-                                }
-                        } else sendAnswer(NO_PERMISSION);
-                    } else sendAnswer(NO_PERMISSION);
-                } else sendError();
+                            if (person.moderator!=1 && person.groupPersonId!=timetable.groupPersonId){//if not moderator and timetable has different teacher (not user person id)
+                                sendAnswer(NO_PERMISSION);
+                                return;
+                            }
+                        }else {
+                            if (person.moderator!=1){
+                                sendAnswer(NO_PERMISSION);
+                                return;
+                            }
+                        }
+                        Savepoint savepoint = null;
+                        try {
+                            savepoint = AppContext.educareaDB.setSavepoint("timetableEdit");
+                        } catch (Exception e) {
+                            log.log(Level.WARNING, "error",e);
+                            sendError();
+                            return;
+                        }
+                        try {
+                            if (timetable.timetableId != 0) {
+                                AppContext.educareaDB.updateTimetable(timetable.timetableId, timetable);
+                            } else {
+                                AppContext.educareaDB.insertTimetable(timetable);
+                            }
+                            AppContext.educareaDB.commit();
+                            sendAnswer(UPDATE_INFO);
+                        } catch (Exception e) {
+                            log.log(Level.WARNING, "error",e);
+                            try {
+                                AppContext.educareaDB.rollback(savepoint);
+                            } catch (Exception ex) {
+                                log.log(Level.WARNING, "error",ex);
+                            }
+                            sendError();
+                        }
+                    }else sendAnswer(NO_PERMISSION);
+                }else sendError();
             }
         }
     }
@@ -735,9 +746,10 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
         if (userId!=0){
             synchronized (lock) {
                 Timetable timetable = AppContext.educareaDB.getTimetableById(timetableId);
-                ArrayList<GroupPerson> groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(timetable.groupId);
-                if (userInGroup(userId, groupPeople)) {
-                    if (userIsModerator(userId, groupPeople)) {
+                int userPersonId = LogicUtils.getGroupPersonIdByUserId(userId, timetable.groupId);
+                GroupPerson person = AppContext.educareaDB.getGroupPersonById(userPersonId);
+                if (userPersonId!=0) {
+                    if (person.moderator==1 || person.groupPersonId == timetable.groupPersonId) {
                         Savepoint savepoint = null;
                         try{
                             savepoint = AppContext.educareaDB.setSavepoint("deleteTimetable");
@@ -798,6 +810,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                                 }
                             }
                             AppContext.educareaDB.deleteGroupPersonCodeByPersonId(groupPersonId);
+                            AppContext.educareaDB.deleteChannelMessageByPersonId(groupPersonId);
                             AppContext.educareaDB.deleteGroupPersonById(groupPersonId);
                             AppContext.educareaDB.commit();
                             sendAnswer(UPDATE_INFO);
@@ -836,8 +849,10 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                         }
                         try {
                             for (int i = 0; i < groupPeople.size(); i++) {
-                                AppContext.educareaDB.deletePersonInviteByPersonId(groupPeople.get(i).groupPersonId);
+                                AppContext.educareaDB.deleteGroupPersonCodeByPersonId(groupPeople.get(i).groupPersonId);
+                                AppContext.educareaDB.deleteChannelMessageByPersonId(groupPeople.get(i).groupPersonId);
                             }
+                            AppContext.educareaDB.deleteTimetableByGroupId(groupId);
                             AppContext.educareaDB.deleteGroupPersonByGroupId(groupId);
                             AppContext.educareaDB.deleteGroupById(groupId);
                             AppContext.educareaDB.commit();

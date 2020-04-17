@@ -613,18 +613,6 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
     }
 
     @Override
-    public void deletePersonInviteByPersonId(int groupPersonId) throws Exception {
-        try(DBWorker.Builder builder = new Builder(false)
-                .setSql("DELETE FROM educarea.group_person_invite WHERE group_person_id = ?")
-                .setParameters(String.valueOf(groupPersonId))
-                .setTypes("int")){
-            builder.build();
-        }catch (Exception e){
-            throw e;
-        }
-    }
-
-    @Override
     public void insertChannelMessage(ChannelMessage channelMessage) throws Exception {
         Date date = new Date();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -802,5 +790,41 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
             throw e;
         }
         return groupPersonCode;
+    }
+
+    @Override
+    public void deleteTimetableByGroupId(int groupId) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+        .setSql("DELETE FROM educarea.timetable WHERE group_id = ?")
+        .setParameters(String.valueOf(groupId))
+        .setTypes("int")){
+            builder.build();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public void deleteChannelMessageByPersonId(int personId) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+        .setSql("DELETE FROM educarea.channel_message WHERE person_from = ?")
+        .setParameters(String.valueOf(personId))
+        .setTypes("int")){
+            builder.build();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public void deleteTokenByCloudToken(String cloudToken) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+                .setSql("DELETE FROM educarea.user_tokens WHERE cloud_token = ?")
+                .setParameters(cloudToken)
+                .setTypes("String")){
+            builder.build();
+        }catch (Exception e){
+            throw e;
+        }
     }
 }
