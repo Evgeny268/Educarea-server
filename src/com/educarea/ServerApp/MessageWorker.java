@@ -609,6 +609,16 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                                 return;
                             }
                             try {
+                                if (oldGroupPerson.personType==1 && groupPerson.personType==0){
+                                    ArrayList<Timetable> timetables = AppContext.educareaDB.getTimetableByPersonId(groupPerson.groupPersonId);
+                                    for (int i = 0; i < timetables.size(); i++) {
+                                        Timetable timetable = timetables.get(i);
+                                        if (timetable.groupPersonId == groupPerson.groupPersonId) {
+                                            timetable.groupPersonId = 0;
+                                            AppContext.educareaDB.updateTimetable(timetable.timetableId, timetable);
+                                        }
+                                    }
+                                }
                                 AppContext.educareaDB.updateGroupPerson(groupPerson.groupPersonId, groupPerson);
                                 AppContext.educareaDB.commit();
                                 sendAnswer(UPDATE_INFO);
