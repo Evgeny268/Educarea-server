@@ -14,6 +14,7 @@ public interface TypeRequestAnswer {
     String UPDATE_TOKEN = "UPDATE_TOKEN";
     String NEED_LOGIN = "NEED_LOGIN";
     String LOGOUT = "LOGOUT";
+    String LOGOUT_OTHER_SESSION = "LOGOUT_OTHER_SESSION";
     String CREATE_GROUP = "CREATE_GROUP";
     String GROUP_ALREADY_EXIST = "GROUP_ALREADY_EXIST";
     String GET_MY_GROUPS = "GET_MY_GROUPS";

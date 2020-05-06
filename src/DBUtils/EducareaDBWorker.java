@@ -827,4 +827,24 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
             throw e;
         }
     }
+
+    @Override
+    public void deleteTokenByToken(String token) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+        .setSql("DELETE FROM educarea.user_tokens WHERE auth_token = ?")
+        .setParameters(token)
+        .setTypes("String")){
+            builder.build();
+        }
+    }
+
+    @Override
+    public void deleteTokenExceptOne(int userId, String token) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+        .setSql("DELETE FROM educarea.user_tokens WHERE user_id = ? AND auth_token != ?")
+        .setParameters(String.valueOf(userId), token)
+        .setTypes("int","String")){
+            builder.build();
+        }
+    }
 }

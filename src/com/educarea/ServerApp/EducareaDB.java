@@ -93,4 +93,8 @@ public interface EducareaDB {
     void deleteOldTokens(int userId, int liveTokenCount) throws Exception;
 
     void deleteTokenByCloudToken(String cloudToken) throws Exception;
+
+    void deleteTokenByToken(String token) throws Exception;
+
+    void deleteTokenExceptOne(int userId, String token) throws Exception;
 }

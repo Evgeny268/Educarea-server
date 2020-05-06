@@ -169,6 +169,12 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                     sendError();
                 }
             }
+            else if (((TransferRequestAnswer) message).request.equals(LOGOUT)){
+                logout();
+            }
+            else if (((TransferRequestAnswer) message).request.equals(LOGOUT_OTHER_SESSION)){
+                logoutOtherSession();
+            }
         }
         else {
             sendError();
@@ -1088,6 +1094,68 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 }
             }
         }
+    }
+
+    private void logout(){
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            Savepoint savepoint = null;
+            try {
+                savepoint = AppContext.educareaDB.setSavepoint("logout");
+            }catch (Exception e){
+                log.log(Level.WARNING, "can't create savepoint", e);
+                sendError();
+                return;
+            }
+            try{
+                AppContext.educareaDB.deleteTokenByToken(clientInfo.getToken());
+                AppContext.educareaDB.commit();
+                clientInfo.setId(0);
+                clientInfo.setLogin(null);
+                clientInfo.setToken(null);
+                clientInfo.setCloudToken(null);
+                try {
+                    sendAnswer(LOGOUT);
+                }catch (Exception ex){}
+            }catch (Exception e){
+                log.log(Level.WARNING, "can't logout",e);
+                try {
+                    AppContext.educareaDB.rollback(savepoint);
+                } catch (Exception ex) {
+                    log.log(Level.WARNING, "can't rollback in database", ex);
+                }
+                sendError();
+            }
+        }else sendError();
+    }
+
+    private void logoutOtherSession(){
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            Savepoint savepoint = null;
+            try {
+                savepoint = AppContext.educareaDB.setSavepoint("logout");
+            }catch (Exception e){
+                log.log(Level.WARNING, "can't create savepoint", e);
+                sendError();
+                return;
+            }
+            try{
+                AppContext.educareaDB.deleteTokenExceptOne(userId, clientInfo.getToken());
+                AppContext.educareaDB.commit();
+                sendAnswer(UPDATE_INFO);
+            }catch (Exception e){
+                log.log(Level.WARNING, "can't logout other session",e);
+                try {
+                    AppContext.educareaDB.rollback(savepoint);
+                } catch (Exception ex) {
+                    log.log(Level.WARNING, "can't rollback in database", ex);
+                }
+                sendError();
+            }
+        }else sendError();
     }
 
     private void sendToAllGroupUsers(Transfers transfers, int groupId){
