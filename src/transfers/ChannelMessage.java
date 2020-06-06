@@ -7,11 +7,9 @@ import java.util.Date;
 import java.util.Objects;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, property ="type")
-public class ChannelMessage implements Serializable, Transfers, Comparable<ChannelMessage>{
+public class ChannelMessage extends Message implements Serializable, Transfers, Comparable<ChannelMessage>{
     public int channelMessageId = 0;
     public int personFrom = 0;
-    public String text = null;
-    public Date date = null;
     public Date readIn = null;
 
     public ChannelMessage() {
@@ -32,14 +30,7 @@ public class ChannelMessage implements Serializable, Transfers, Comparable<Chann
 
     @Override
     public int compareTo(ChannelMessage o) {
-        if (this.date.equals(o.date)){
-            if (this.channelMessageId<o.channelMessageId){
-                return -1;
-            }else return 1;
-        }
-        if (this.date.before(o.date)){
-            return -1;
-        }else return 1;
+        return Integer.compare(this.channelMessageId, o.channelMessageId);
     }
 
     @Override

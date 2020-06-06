@@ -97,4 +97,12 @@ public interface EducareaDB {
     void deleteTokenByToken(String token) throws Exception;
 
     void deleteTokenExceptOne(int userId, String token) throws Exception;
+
+    void insertStudentChatMessage(StudentsChatMessage chatMessage) throws Exception;
+
+    ArrayList<StudentsChatMessage> selectStudentsChatMessage(int groupId, int count) throws Exception;
+
+    ArrayList<StudentsChatMessage> selectStudentsChatMessage(int groupId, int count, Integer lastId) throws Exception;
+
+    void deleteStudentsChatMessageByGroupId(int groupId) throws Exception;
 }

@@ -195,6 +195,24 @@ public class TransfersFactory {
                     return null;
                 }
             }
+            else if (node.get("type").asText().equals("."+StudentsChatMessage.class.getSimpleName())) {
+                try {
+                    StudentsChatMessage out = objectMapper.readValue(jsonString, StudentsChatMessage.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+            else if (node.get("type").asText().equals("."+StudentsChatMessages.class.getSimpleName())) {
+                try {
+                    StudentsChatMessages out = objectMapper.readValue(jsonString, StudentsChatMessages.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
             else {
                 return null;
             }

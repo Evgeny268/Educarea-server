@@ -629,6 +629,20 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
     }
 
     @Override
+    public void insertStudentChatMessage(StudentsChatMessage chatMessage) throws Exception {
+        Date date = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String currentDateTime = format.format(date);
+        try(DBWorker.Builder builder = new Builder(false)
+                .setSql("INSERT INTO educarea.students_chat (group_id, group_person_id, text, date) VALUES (?,?,?,?)")
+                .setParameters(String.valueOf(chatMessage.groupId), String.valueOf(chatMessage.groupPersonId), chatMessage.text, currentDateTime)
+                .setTypes("int","int","String","String")){
+            builder.build();
+        }
+    }
+
+    @Override
     public ArrayList<ChannelMessage> selectChannelMessageByPersonId(int personId, int count) throws Exception {
         ArrayList<ChannelMessage> messages = new ArrayList<>();
         try(DBWorker.Builder builder = new Builder(true)
@@ -645,8 +659,7 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
                 String sDate = resultSet.getString(4);
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 format.setTimeZone(TimeZone.getTimeZone("UTC"));
-                Date date = format.parse(sDate);
-                message.date = date;
+                message.date = format.parse(sDate);
                 message.readIn = resultSet.getDate(5);
                 messages.add(message);
             }
@@ -677,6 +690,62 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
                 Date date = format.parse(sDate);
                 message.date = date;
                 message.readIn = resultSet.getDate(5);
+                messages.add(message);
+            }
+        }catch (Exception e){
+            throw e;
+        }
+        return messages;
+    }
+
+    @Override
+    public ArrayList<StudentsChatMessage> selectStudentsChatMessage(int groupId, int count) throws Exception {
+        ArrayList<StudentsChatMessage> messages = new ArrayList<>();
+        try(DBWorker.Builder builder = new Builder(true)
+        .setSql("SELECT * FROM educarea.students_chat WHERE (group_id = ?) ORDER BY students_chat_id DESC LIMIT ?;")
+        .setParameters(String.valueOf(groupId), String.valueOf(count))
+        .setTypes("int","int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                StudentsChatMessage message = new StudentsChatMessage();
+                message.studentsChatId = resultSet.getInt(1);
+                message.groupId = resultSet.getInt(2);
+                message.groupPersonId = resultSet.getInt(3);
+                message.text = resultSet.getString(4);
+                String sDate = resultSet.getString(5);
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                format.setTimeZone(TimeZone.getTimeZone("UTC"));
+                message.date = format.parse(sDate);
+                message.readIn = resultSet.getDate(6);
+                messages.add(message);
+            }
+        }catch (Exception e){
+            throw e;
+        }
+        return messages;
+    }
+
+    @Override
+    public ArrayList<StudentsChatMessage> selectStudentsChatMessage(int groupId, int count, Integer lastId) throws Exception {
+        ArrayList<StudentsChatMessage> messages = new ArrayList<>();
+        try(DBWorker.Builder builder = new Builder(true)
+                .setSql("SELECT * FROM educarea.students_chat WHERE (group_id = ? AND students_chat_id < ?) ORDER BY students_chat_id DESC LIMIT ?;")
+                .setParameters(String.valueOf(groupId), String.valueOf(lastId), String.valueOf(count))
+                .setTypes("int","int","int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                StudentsChatMessage message = new StudentsChatMessage();
+                message.studentsChatId = resultSet.getInt(1);
+                message.groupId = resultSet.getInt(2);
+                message.groupPersonId = resultSet.getInt(3);
+                message.text = resultSet.getString(4);
+                String sDate = resultSet.getString(5);
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                format.setTimeZone(TimeZone.getTimeZone("UTC"));
+                message.date = format.parse(sDate);
+                message.readIn = resultSet.getDate(6);
                 messages.add(message);
             }
         }catch (Exception e){
@@ -809,6 +878,18 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
         try(DBWorker.Builder builder = new Builder(false)
         .setSql("DELETE FROM educarea.channel_message WHERE person_from = ?")
         .setParameters(String.valueOf(personId))
+        .setTypes("int")){
+            builder.build();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public void deleteStudentsChatMessageByGroupId(int groupId) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+        .setSql("DELETE FROM educarea.students_chat WHERE group_id = ?")
+        .setParameters(String.valueOf(groupId))
         .setTypes("int")){
             builder.build();
         }catch (Exception e){

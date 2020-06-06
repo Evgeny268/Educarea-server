@@ -52,6 +52,7 @@ public class ConsoleWorker {
     }
 
     private static void sendUpdateInfo(){
+        updateVersion();
         CloudMessageSender.appNews(CloudMessageType.update_available);
     }
 
@@ -77,7 +78,7 @@ public class ConsoleWorker {
             deleteGroupByName(command);
         }else if (command.startsWith("-id ")){
             command = command.replace("-id ","");
-            int id = Integer.valueOf(command);
+            int id = Integer.parseInt(command);
             deleteGroupById(id);
         }
     }

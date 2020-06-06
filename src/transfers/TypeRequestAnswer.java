@@ -43,4 +43,6 @@ public interface TypeRequestAnswer {
     String USER_ALREADY_BIND = "USER_ALREADY_BIND";
     String UNBIND_USER = "UNBIND_USER";
     String NO_PERSON_CODE = "NO_PERSON_CODE";
+    String NEW_STUDENT_MESSAGE = "NEW_STUDENT_MESSAGE";
+    String GET_STUDENT_MESSAGE = "GET_STUDENT_MESSAGE";
 }

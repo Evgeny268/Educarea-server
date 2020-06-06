@@ -55,7 +55,15 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 log.log(Level.WARNING, "Timetable transfer error",e);
                 sendError();
             }
+        }else if (message instanceof StudentsChatMessage){
+            try{
+                sendStudentChatMessage((StudentsChatMessage) message);
+            }catch (Exception e){
+                log.log(Level.WARNING, "error in function sendStudentChatMessage",e);
+                sendError();
+            }
         }
+
         else if (message instanceof TransferRequestAnswer){
             if (((TransferRequestAnswer) message).request==null){
                 sendError();
@@ -174,6 +182,13 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
             }
             else if (((TransferRequestAnswer) message).request.equals(LOGOUT_OTHER_SESSION)){
                 logoutOtherSession();
+            }else if (((TransferRequestAnswer) message).request.equals(GET_STUDENT_MESSAGE)){
+                try {
+                    getStudentChatMessage((TransferRequestAnswer) message);
+                }catch (Exception e){
+                    log.log(Level.WARNING, "can't get students chat message",e);
+                    sendError();
+                }
             }
         }
         else {
@@ -855,32 +870,11 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 ArrayList<GroupPerson> groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(groupId);
                 if (userInGroup(userId,groupPeople)){
                     if (userIsModerator(userId,groupPeople)){
-                        Savepoint savepoint = null;
-                        try {
-                            savepoint = AppContext.educareaDB.setSavepoint("deleteGroup");
-                        } catch (Exception e) {
-                            log.log(Level.WARNING, "error",e);
-                            sendError();
-                            return;
-                        }
-                        try {
-                            for (int i = 0; i < groupPeople.size(); i++) {
-                                AppContext.educareaDB.deleteGroupPersonCodeByPersonId(groupPeople.get(i).groupPersonId);
-                                AppContext.educareaDB.deleteChannelMessageByPersonId(groupPeople.get(i).groupPersonId);
-                            }
-                            AppContext.educareaDB.deleteTimetableByGroupId(groupId);
-                            AppContext.educareaDB.deleteGroupPersonByGroupId(groupId);
-                            AppContext.educareaDB.deleteGroupById(groupId);
-                            AppContext.educareaDB.commit();
+                        LogicUtils utils = new LogicUtils();
+                        if (utils.deleteGroup(groupId)){
                             sendAnswer(DELETE_GROUP);
-                        } catch (Exception e) {
-                            log.log(Level.WARNING, "error",e);
-                            try {
-                                AppContext.educareaDB.rollback(savepoint);
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
-                            }
-                            sendError();
+                        }else {
+                            sendAnswer(ERROR);
                         }
                     }else sendAnswer(NO_PERMISSION);
                 }else sendAnswer(NO_PERMISSION);
@@ -917,15 +911,18 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                     return;
                 }
                 ChannelMessage channelMessage = new ChannelMessage(groupPerson.groupPersonId,message);
-                Savepoint savepoint = null;
-                savepoint = AppContext.educareaDB.setSavepoint("sendChannelMessage");
-                try {
-                    AppContext.educareaDB.insertChannelMessage(channelMessage);
-                    AppContext.educareaDB.commit();
-                }catch (Exception e){
-                    log.log(Level.WARNING, "error",e);
-                    AppContext.educareaDB.rollback(savepoint);
-                    return;
+                synchronized (lock) {
+                    Savepoint savepoint = null;
+                    savepoint = AppContext.educareaDB.setSavepoint("sendChannelMessage");
+                    try {
+                        AppContext.educareaDB.insertChannelMessage(channelMessage);
+                        AppContext.educareaDB.commit();
+                    } catch (Exception e) {
+                        log.log(Level.WARNING, "error", e);
+                        AppContext.educareaDB.rollback(savepoint);
+                        sendError();
+                        return;
+                    }
                 }
                 sendToAllGroupUsers(new TransferRequestAnswer(NEW_CHANNEL_MESSAGE),groupId);
                 CloudMessageSender.channelMessage(groupId,groupPerson.groupPersonId,message);
@@ -1013,6 +1010,86 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                         }else sendError();
                     }else sendAnswer(NO_PERMISSION);
                 }else sendAnswer(NO_PERMISSION);
+            }
+        }
+    }
+
+    private void sendStudentChatMessage(StudentsChatMessage message) throws Exception{
+        if (message.text == null){
+            sendError();
+            return;
+        }
+        if (message.text.equals("")){
+            sendError();
+            return;
+        }
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            Integer groupPersonId = LogicUtils.getGroupPersonIdByUserId(userId, message.groupId);
+            if (groupPersonId == null){
+                sendAnswer(NO_PERMISSION);
+                return;
+            }
+            GroupPerson groupPerson = AppContext.educareaDB.getGroupPersonById(groupPersonId);
+            if (groupPerson.personType==0){
+                StudentsChatMessage chatMessage = new StudentsChatMessage();
+                chatMessage.groupId = groupPerson.groupId;
+                chatMessage.groupPersonId = groupPersonId;
+                chatMessage.text = message.text;
+                synchronized (lock){
+                    Savepoint savepoint = null;
+                    savepoint = AppContext.educareaDB.setSavepoint("sendStudentChatMessage");
+                    try{
+                        AppContext.educareaDB.insertStudentChatMessage(chatMessage);
+                        AppContext.educareaDB.commit();
+                    }catch (Exception e){
+                        log.log(Level.WARNING, "can't insert new studentMessage in db", e);
+                        AppContext.educareaDB.rollback(savepoint);
+                        sendError();
+                        return;
+                    }
+                }
+                LogicUtils.sendToAllStudentGroupUser(new TransferRequestAnswer(NEW_STUDENT_MESSAGE), groupPerson.groupId);
+                CloudMessageSender.studentMessage(chatMessage);
+
+            }else {
+                sendAnswer(NO_PERMISSION);
+                return;
+            }
+        }
+    }
+
+    private void getStudentChatMessage(TransferRequestAnswer transferRequestAnswer) throws Exception{
+        int groupId = Integer.parseInt(transferRequestAnswer.extra);
+        int count = Integer.parseInt(transferRequestAnswer.extraArr[0]);
+        Integer lastId = null;
+        if (transferRequestAnswer.extraArr.length>1) {
+            if (transferRequestAnswer.extraArr[1] != null) {
+                lastId = Integer.parseInt(transferRequestAnswer.extraArr[1]);
+            }
+        }
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            Integer groupPersonId = LogicUtils.getGroupPersonIdByUserId(userId,groupId);
+            if (groupPersonId==null){
+                sendAnswer(NO_PERMISSION);
+                return;
+            }
+            GroupPerson groupPerson = AppContext.educareaDB.getGroupPersonById(groupPersonId);
+            if (groupPerson.personType==0){
+                ArrayList<StudentsChatMessage> messages = null;
+                if (lastId==null){
+                    messages = AppContext.educareaDB.selectStudentsChatMessage(groupId, count);
+                }else {
+                    messages = AppContext.educareaDB.selectStudentsChatMessage(groupId, count, lastId);
+                }
+                Collections.sort(messages);
+                sendTransfers(new StudentsChatMessages(messages));
+            }else {
+                sendAnswer(NO_PERMISSION);
+                return;
             }
         }
     }
