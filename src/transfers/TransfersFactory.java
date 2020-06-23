@@ -213,6 +213,24 @@ public class TransfersFactory {
                     return null;
                 }
             }
+            else if (node.get("type").asText().equals("."+Event.class.getSimpleName())) {
+                try {
+                    Event out = objectMapper.readValue(jsonString, Event.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+            else if (node.get("type").asText().equals("."+EventList.class.getSimpleName())) {
+                try {
+                    EventList out = objectMapper.readValue(jsonString, EventList.class);
+                    return out;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
             else {
                 return null;
             }

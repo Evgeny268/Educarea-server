@@ -8,7 +8,6 @@ import com.google.firebase.messaging.MulticastMessage;
 import transfers.*;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -101,9 +100,6 @@ public class CloudMessageSender implements CloudMessageType{
                 if (sendMessage.length() > MAX_MESSAGE_SIZE) {
                     sendMessage = sendMessage.substring(0, MAX_MESSAGE_SIZE);
                 }
-                if (sendMessage.length() > MAX_MESSAGE_SIZE) {
-                    sendMessage = sendMessage.substring(0, MAX_MESSAGE_SIZE);
-                }
 
                 MulticastMessage firebaseMessage = MulticastMessage.builder()
                         .putData("type", student_message)
@@ -133,6 +129,42 @@ public class CloudMessageSender implements CloudMessageType{
                 FirebaseMessaging.getInstance().send(firebaseMessage);
             } catch (Exception e) {
                 log.log(Level.WARNING, "can't send firebase app news message", e);
+            }
+        }).start();
+    }
+
+    public static void event(final Event event, int groupPersonId){
+        new Thread(() -> {
+            Logger log = Logger.getLogger(EducLogger.class.getName());
+            try{
+                GroupPerson person = AppContext.educareaDB.getGroupPersonById(groupPersonId);
+                Group group = AppContext.educareaDB.getGroupById(person.groupId);
+                List<GroupPerson> personList = AppContext.educareaDB.getGroupPersonsByGroupId(group.groupId);
+                personList.removeIf(current -> current.personType == 1 || current.groupPersonId == groupPersonId);
+                List<String> userCloudTokens = new ArrayList<>();
+                for (int j = 0; j < personList.size(); j++) {
+                    ArrayList<UserTokens> tokens = AppContext.educareaDB.getUserTokensByUserId(personList.get(j).userId);
+                    for (int k = 0; k < tokens.size(); k++) {
+                        if (tokens.get(k).cloudToken != null) {
+                            userCloudTokens.add(tokens.get(k).cloudToken);
+                        }
+                    }
+                }
+                if (userCloudTokens.size()==0) return;
+                String eventName = event.title;
+                if (eventName.length() > MAX_MESSAGE_SIZE){
+                    eventName = eventName.substring(0, MAX_MESSAGE_SIZE);
+                }
+                String evendDate = String.valueOf(event.date.getTime());
+                MulticastMessage firebaseMessage = MulticastMessage.builder()
+                        .putData("type", CloudMessageType.event)
+                        .putData("name", eventName)
+                        .putData("date", evendDate)
+                        .addAllTokens(userCloudTokens)
+                        .build();
+                FirebaseMessaging.getInstance().sendMulticast(firebaseMessage);
+            }catch (Exception e){
+                log.log(Level.WARNING, "can't send firebase event notify", e);
             }
         }).start();
     }

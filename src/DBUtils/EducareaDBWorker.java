@@ -9,6 +9,7 @@ import java.sql.Savepoint;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 public class EducareaDBWorker extends DBWorker implements EducareaDB {
@@ -898,6 +899,18 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
     }
 
     @Override
+    public void deleteStudentsChatMessageByPersonId(int groupPersonId) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+                .setSql("DELETE FROM educarea.students_chat WHERE group_person_id = ?")
+                .setParameters(String.valueOf(groupPersonId))
+                .setTypes("int")){
+            builder.build();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
     public void deleteTokenByCloudToken(String cloudToken) throws Exception {
         try(DBWorker.Builder builder = new Builder(false)
                 .setSql("DELETE FROM educarea.user_tokens WHERE cloud_token = ?")
@@ -925,6 +938,122 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
         .setSql("DELETE FROM educarea.user_tokens WHERE user_id = ? AND auth_token != ?")
         .setParameters(String.valueOf(userId), token)
         .setTypes("int","String")){
+            builder.build();
+        }
+    }
+
+    @Override
+    public void insertEvent(Event event) throws Exception {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String currentDateTime = format.format(event.date);
+        if (event.groupPersonId!=null) {
+            try (DBWorker.Builder builder = new Builder(false)
+                    .setSql("INSERT INTO educarea.event (group_id, group_person_id, title, date, text) VALUES (?,?,?,?,?);")
+                    .setParameters(String.valueOf(event.groupId), String.valueOf(event.groupPersonId), event.title, currentDateTime, event.text)
+                    .setTypes("int", "int", "String", "String", "String")) {
+                builder.build();
+            }
+        }else {
+            try (DBWorker.Builder builder = new Builder(false)
+                    .setSql("INSERT INTO educarea.event (group_id, group_person_id, title, date, text) VALUES (?,?,?,?,?);")
+                    .setParameters(String.valueOf(event.groupId), null, event.title, currentDateTime, event.text)
+                    .setTypes("int", "int", "String", "String", "String")) {
+                builder.build();
+            }
+        }
+    }
+
+    @Override
+    public void updateEvent(Event event) throws Exception {
+        Integer groupPersonId = event.groupPersonId;
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String currentDateTime = format.format(event.date);
+        if (groupPersonId!=null) {
+            try (DBWorker.Builder builder = new Builder(false)
+                    .setSql("UPDATE educarea.event SET group_person_id = ?, title = ?, date = ?, text = ?, WHERE event_id = ?")
+                    .setParameters(String.valueOf(groupPersonId), event.title, currentDateTime, event.text, String.valueOf(event.eventId))
+                    .setTypes("int", "String", "String", "String", "int")) {
+                builder.build();
+            }
+        }else {
+            try (DBWorker.Builder builder = new Builder(false)
+                    .setSql("UPDATE educarea.event SET group_person_id = ?, title = ?, date = ?, text = ?, WHERE event_id = ?")
+                    .setParameters(null, event.title, currentDateTime, event.text, String.valueOf(event.eventId))
+                    .setTypes("int", "String", "String", "String", "int")) {
+                builder.build();
+            }
+        }
+    }
+
+    @Override
+    public Event getEventById(int event_id) throws Exception {
+        Event event = null;
+        try(DBWorker.Builder builder = new Builder(true)
+        .setSql("SELECT * FROM educarea.event WHERE event_id = ?")
+        .setParameters(String.valueOf(event_id))
+        .setTypes("int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                event = new Event();
+                event.eventId = resultSet.getInt(1);
+                event.groupId = resultSet.getInt(2);
+                event.groupPersonId = resultSet.getInt(3);
+                event.title = resultSet.getString(4);
+                String sDate = resultSet.getString(5);
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                format.setTimeZone(TimeZone.getTimeZone("UTC"));
+                event.date = format.parse(sDate);
+                event.text = resultSet.getString(6);
+            }
+        }
+        return event;
+    }
+
+    @Override
+    public List<Event> getEvents(int groupId) throws Exception {
+        List<Event> events = new ArrayList<>();
+        try(DBWorker.Builder builder = new Builder(true)
+                .setSql("SELECT * FROM educarea.event WHERE group_id = ?")
+                .setParameters(String.valueOf(groupId))
+                .setTypes("int")) {
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()) {
+                Event event = new Event();
+                event.eventId = resultSet.getInt(1);
+                event.groupId = resultSet.getInt(2);
+                event.groupPersonId = resultSet.getInt(3);
+                event.title = resultSet.getString(4);
+                String sDate = resultSet.getString(5);
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                format.setTimeZone(TimeZone.getTimeZone("UTC"));
+                event.date = format.parse(sDate);
+                event.text = resultSet.getString(6);
+                events.add(event);
+            }
+        }
+        return events;
+    }
+
+    @Override
+    public void deleteEventById(int eventId) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+                .setSql("DELETE FROM educarea.event WHERE event_id = ?")
+                .setParameters(String.valueOf(eventId))
+                .setTypes("int")){
+            builder.build();
+        }
+    }
+
+    @Override
+    public void deleteEventByGroupId(int groupId) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+                .setSql("DELETE FROM educarea.event WHERE group_id = ?")
+                .setParameters(String.valueOf(groupId))
+                .setTypes("int")){
             builder.build();
         }
     }

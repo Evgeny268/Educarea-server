@@ -5,6 +5,7 @@ import transfers.*;
 import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public interface EducareaDB {
 
@@ -105,4 +106,18 @@ public interface EducareaDB {
     ArrayList<StudentsChatMessage> selectStudentsChatMessage(int groupId, int count, Integer lastId) throws Exception;
 
     void deleteStudentsChatMessageByGroupId(int groupId) throws Exception;
+
+    void deleteStudentsChatMessageByPersonId(int groupPersonId) throws Exception;
+
+    void insertEvent(Event event) throws Exception;
+
+    void updateEvent(Event event) throws Exception;
+
+    Event getEventById(int event_id) throws Exception;
+
+    List<Event> getEvents(int groupId) throws Exception;
+
+    void deleteEventById(int eventId) throws Exception;
+
+    void deleteEventByGroupId(int groupId) throws Exception;
 }

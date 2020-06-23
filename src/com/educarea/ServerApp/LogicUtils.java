@@ -2,6 +2,7 @@ package com.educarea.ServerApp;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.java_websocket.WebSocket;
+import transfers.Event;
 import transfers.GroupPerson;
 import transfers.Transfers;
 
@@ -55,6 +56,7 @@ public class LogicUtils {
                 AppContext.educareaDB.deleteGroupPersonCodeByPersonId(groupPeople.get(i).groupPersonId);
                 AppContext.educareaDB.deleteChannelMessageByPersonId(groupPeople.get(i).groupPersonId);
             }
+            AppContext.educareaDB.deleteEventByGroupId(groupId);
             AppContext.educareaDB.deleteStudentsChatMessageByGroupId(groupId);
             AppContext.educareaDB.deleteTimetableByGroupId(groupId);
             AppContext.educareaDB.deleteGroupPersonByGroupId(groupId);
@@ -99,6 +101,58 @@ public class LogicUtils {
             }catch (Exception e){
                 log.log(Level.WARNING, "error",e);
             }
+        }
+    }
+
+    public static boolean addEvent(Event event, boolean update){
+        Logger log = Logger.getLogger(EducLogger.class.getName());
+        Savepoint savepoint = null;
+        try {
+            savepoint = AppContext.educareaDB.setSavepoint("addEvent");
+        } catch (Exception e) {
+            log.log(Level.WARNING, "error",e);
+            return false;
+        }
+        try{
+            if (update){
+                AppContext.educareaDB.updateEvent(event);
+            }else {
+                AppContext.educareaDB.insertEvent(event);
+            }
+            AppContext.educareaDB.commit();
+            return true;
+        }catch (Exception e){
+            log.log(Level.WARNING, "error",e);
+            try {
+                AppContext.educareaDB.rollback(savepoint);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            return false;
+        }
+    }
+
+    public static boolean deleteEvent(int eventId){
+        Logger log = Logger.getLogger(EducLogger.class.getName());
+        Savepoint savepoint = null;
+        try {
+            savepoint = AppContext.educareaDB.setSavepoint("deleteEvent");
+        } catch (Exception e) {
+            log.log(Level.WARNING, "error",e);
+            return false;
+        }
+        try{
+            AppContext.educareaDB.deleteEventById(eventId);
+            AppContext.educareaDB.commit();
+            return true;
+        } catch (Exception e){
+            log.log(Level.WARNING, "error",e);
+            try {
+                AppContext.educareaDB.rollback(savepoint);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            return false;
         }
     }
 

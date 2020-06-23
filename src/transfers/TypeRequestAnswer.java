@@ -45,4 +45,6 @@ public interface TypeRequestAnswer {
     String NO_PERSON_CODE = "NO_PERSON_CODE";
     String NEW_STUDENT_MESSAGE = "NEW_STUDENT_MESSAGE";
     String GET_STUDENT_MESSAGE = "GET_STUDENT_MESSAGE";
+    String GET_EVENTS = "GET_EVENTS";
+    String DELETE_EVENT = "DELETE_EVENT";
 }

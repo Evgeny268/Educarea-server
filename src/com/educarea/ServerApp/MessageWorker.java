@@ -62,6 +62,13 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 log.log(Level.WARNING, "error in function sendStudentChatMessage",e);
                 sendError();
             }
+        }else if (message instanceof Event){
+            try {
+                addEvent((Event) message);
+            } catch (Exception e) {
+                log.log(Level.WARNING, "can't add event",e);
+                sendError();
+            }
         }
 
         else if (message instanceof TransferRequestAnswer){
@@ -182,11 +189,28 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
             }
             else if (((TransferRequestAnswer) message).request.equals(LOGOUT_OTHER_SESSION)){
                 logoutOtherSession();
-            }else if (((TransferRequestAnswer) message).request.equals(GET_STUDENT_MESSAGE)){
+            }else if (((TransferRequestAnswer) message).request.equals(GET_EVENTS)){
+                try {
+                    getEvents((TransferRequestAnswer) message);
+                } catch (Exception e) {
+                    log.log(Level.WARNING, "get events error",e);
+                    sendError();
+                }
+            }
+            else if (((TransferRequestAnswer) message).request.equals(GET_STUDENT_MESSAGE)){
                 try {
                     getStudentChatMessage((TransferRequestAnswer) message);
                 }catch (Exception e){
                     log.log(Level.WARNING, "can't get students chat message",e);
+                    sendError();
+                }
+            }
+
+            else if (((TransferRequestAnswer) message).request.equals(DELETE_EVENT)){
+                try{
+                    deleteEvent((TransferRequestAnswer) message);
+                } catch (Exception e) {
+                    log.log(Level.WARNING, "can't delete event",e);
                     sendError();
                 }
             }
@@ -823,6 +847,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 ArrayList<GroupPerson> groupPeople = AppContext.educareaDB.getGroupPersonsByGroupId(deletePerson.groupId);
                 if (userInGroup(userId, groupPeople)) {
                     if (userIsModerator(userId, groupPeople)) {
+                        List<Event> events = AppContext.educareaDB.getEvents(deletePerson.groupId);
                         ArrayList<Timetable> timetables = AppContext.educareaDB.getTimetableByPersonId(groupPersonId);
                         Savepoint savepoint = null;
                         try {
@@ -833,6 +858,13 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                             return;
                         }
                         try {
+                            for (int i = 0; i < events.size(); i++) {
+                                Event event = events.get(i);
+                                if (event.groupPersonId==groupPersonId){
+                                    event.groupPersonId = null;
+                                    AppContext.educareaDB.updateEvent(event);
+                                }
+                            }
                             for (int i = 0; i < timetables.size(); i++) {
                                 Timetable timetable = timetables.get(i);
                                 if (timetable.groupPersonId == groupPersonId) {
@@ -841,6 +873,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                                 }
                             }
                             AppContext.educareaDB.deleteGroupPersonCodeByPersonId(groupPersonId);
+                            AppContext.educareaDB.deleteStudentsChatMessageByPersonId(groupPersonId);
                             AppContext.educareaDB.deleteChannelMessageByPersonId(groupPersonId);
                             AppContext.educareaDB.deleteGroupPersonById(groupPersonId);
                             AppContext.educareaDB.commit();
@@ -1168,6 +1201,93 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                         }
                         sendError();
                     }
+                }
+            }
+        }
+    }
+
+    private void addEvent(Event event) throws Exception{
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            Integer personId = LogicUtils.getGroupPersonIdByUserId(userId, event.groupId);
+            GroupPerson groupPerson = AppContext.educareaDB.getGroupPersonById(personId);
+            if (groupPerson.personType==0 && groupPerson.moderator==0){
+                sendAnswer(NO_PERMISSION);
+                return;
+            }
+            if (event.groupPersonId!=null){
+                if (!event.groupPersonId.equals(personId)){
+                    sendAnswer(NO_PERMISSION);
+                    return;
+                }
+            }else {
+                if (groupPerson.personType==1){
+                    event.groupPersonId = personId;
+                }
+            }
+            if (event.eventId!=null){
+                Event oldEvent = AppContext.educareaDB.getEventById(event.eventId);
+                if (!oldEvent.groupId.equals(event.groupId)){
+                    sendAnswer(NO_PERMISSION);
+                    return;
+                }
+                if (LogicUtils.addEvent(event, true)){
+                    sendAnswer(UPDATE_INFO);
+                    CloudMessageSender.event(event, personId);
+                }else {
+                    sendError();
+                }
+            }else {
+                if (LogicUtils.addEvent(event, false)){
+                    sendAnswer(UPDATE_INFO);
+                    CloudMessageSender.event(event, personId);
+                }else {
+                    sendError();
+                }
+            }
+        }
+    }
+
+    private void getEvents(TransferRequestAnswer transferRequestAnswer) throws Exception{
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            int groupId = Integer.parseInt(transferRequestAnswer.extra);
+            Integer personId = LogicUtils.getGroupPersonIdByUserId(userId, groupId);
+            GroupPerson groupPerson = AppContext.educareaDB.getGroupPersonById(personId);
+            if (groupPerson!=null){
+                List<Event> events = AppContext.educareaDB.getEvents(groupId);
+                sendTransfers(new EventList(events));
+            }
+        }
+    }
+
+    private void deleteEvent(TransferRequestAnswer transferRequestAnswer) throws Exception{
+        Integer eventId = Integer.parseInt(transferRequestAnswer.extra);
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            Event event = AppContext.educareaDB.getEventById(eventId);
+            Integer personId = LogicUtils.getGroupPersonIdByUserId(userId, event.groupId);
+            GroupPerson groupPerson = AppContext.educareaDB.getGroupPersonById(personId);
+            boolean canDelete = false;
+            if (groupPerson.moderator==1){
+                canDelete = true;
+            }else {
+                if (event.groupPersonId == null){
+                    sendAnswer(NO_PERMISSION);
+                }else if (event.groupPersonId.equals(groupPerson.groupPersonId)){
+                    canDelete = true;
+                } else {
+                    sendAnswer(NO_PERMISSION);
+                }
+            }
+            if (canDelete){
+                if (LogicUtils.deleteEvent(event.eventId)){
+                    sendAnswer(UPDATE_INFO);
+                }else {
+                    sendError();
                 }
             }
         }
