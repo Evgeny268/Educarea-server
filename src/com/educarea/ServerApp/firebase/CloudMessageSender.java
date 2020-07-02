@@ -168,4 +168,37 @@ public class CloudMessageSender implements CloudMessageType{
             }
         }).start();
     }
+
+    public static void personalMessage(final PersonalMessage personalMessage){
+        new Thread(() -> {
+            Logger log = Logger.getLogger(EducLogger.class.getName());
+            try{
+                GroupPerson person = AppContext.educareaDB.getGroupPersonById(personalMessage.personFrom);
+                GroupPerson personTo = AppContext.educareaDB.getGroupPersonById(personalMessage.personTo);
+                Group group = AppContext.educareaDB.getGroupById(person.groupId);
+                List<String> userCloudTokens = new ArrayList<>();
+                List<UserTokens> tokens = AppContext.educareaDB.getUserTokensByUserId(personTo.userId);
+                for (UserTokens userTokens: tokens){
+                    if (userTokens.cloudToken != null){
+                        userCloudTokens.add(userTokens.cloudToken);
+                    }
+                }
+                if (userCloudTokens.size()==0) return;
+                String sendMessage = personalMessage.text;
+                if (sendMessage.length() > MAX_MESSAGE_SIZE) {
+                    sendMessage = sendMessage.substring(0, MAX_MESSAGE_SIZE);
+                }
+                MulticastMessage message = MulticastMessage.builder()
+                        .putData("type", CloudMessageType.channel_personal_message)
+                        .putData("group_id",String.valueOf(group.groupId))
+                        .putData("groupPersonId",String.valueOf(person.groupPersonId))
+                        .putData("message",sendMessage)
+                        .addAllTokens(userCloudTokens)
+                        .build();
+                FirebaseMessaging.getInstance().sendMulticast(message);
+            }catch (Exception e){
+                log.log(Level.WARNING, "can't send firebase personalMessage notify", e);
+            }
+        }).start();
+    }
 }

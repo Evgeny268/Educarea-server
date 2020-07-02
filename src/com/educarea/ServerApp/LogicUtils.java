@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.java_websocket.WebSocket;
 import transfers.Event;
 import transfers.GroupPerson;
+import transfers.PersonalMessage;
 import transfers.Transfers;
 
 import java.io.IOException;
@@ -55,6 +56,7 @@ public class LogicUtils {
             for (int i = 0; i < groupPeople.size(); i++) {
                 AppContext.educareaDB.deleteGroupPersonCodeByPersonId(groupPeople.get(i).groupPersonId);
                 AppContext.educareaDB.deleteChannelMessageByPersonId(groupPeople.get(i).groupPersonId);
+                AppContext.educareaDB.deletePersonalMessageByPersonId(groupPeople.get(i).groupPersonId);
             }
             AppContext.educareaDB.deleteEventByGroupId(groupId);
             AppContext.educareaDB.deleteStudentsChatMessageByGroupId(groupId);
@@ -71,6 +73,26 @@ public class LogicUtils {
                 ex.printStackTrace();
             }
             return false;
+        }
+    }
+
+    public static void sendTransferToGroupPerson(Transfers transfers, int groupPersonId) throws Exception {
+        Logger log = Logger.getLogger(EducLogger.class.getName());
+        GroupPerson person = AppContext.educareaDB.getGroupPersonById(groupPersonId);
+        if (person.userId!=0){
+            Map<WebSocket, ClientInfo> map = new HashMap<>(AppContext.appWebSocket.getClients());
+            for (Map.Entry<WebSocket, ClientInfo> entry: map.entrySet()){
+                try{
+                    WebSocket webSocket = entry.getKey();
+                    ClientInfo clientInfo = entry.getValue();
+                    if (person.userId == clientInfo.getId()){
+                        String out = objToJson(transfers);
+                        webSocket.send(out);
+                    }
+                }catch (Exception e){
+                    log.log(Level.WARNING, "error",e);
+                }
+            }
         }
     }
 
@@ -143,6 +165,30 @@ public class LogicUtils {
         }
         try{
             AppContext.educareaDB.deleteEventById(eventId);
+            AppContext.educareaDB.commit();
+            return true;
+        } catch (Exception e){
+            log.log(Level.WARNING, "error",e);
+            try {
+                AppContext.educareaDB.rollback(savepoint);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            return false;
+        }
+    }
+
+    public static boolean addPersonalMessage(PersonalMessage personalMessage){
+        Logger log = Logger.getLogger(EducLogger.class.getName());
+        Savepoint savepoint = null;
+        try {
+            savepoint = AppContext.educareaDB.setSavepoint("addPersonalMessage");
+        } catch (Exception e) {
+            log.log(Level.WARNING, "error",e);
+            return false;
+        }
+        try{
+            AppContext.educareaDB.insertPersonalMessage(personalMessage);
             AppContext.educareaDB.commit();
             return true;
         } catch (Exception e){

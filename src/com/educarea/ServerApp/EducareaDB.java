@@ -120,4 +120,16 @@ public interface EducareaDB {
     void deleteEventById(int eventId) throws Exception;
 
     void deleteEventByGroupId(int groupId) throws Exception;
+
+    void insertPersonalMessage(PersonalMessage personalMessage) throws Exception;
+
+    List<PersonalMessage> getPersonalMessagesByPersonsId(int person_from, int person_to, int count) throws Exception;
+
+    List<PersonalMessage> getPersonalMessagesByPersonsId(int person_from, int person_to, int count, int lastId) throws Exception;
+
+    List<PersonalMessage> getLastPersonalMessage(int groupPersonId, int count) throws Exception;
+
+    List<PersonalMessage> getLastPersonalMessage(int groupPersonId, int count, int lastId) throws Exception;
+
+    void deletePersonalMessageByPersonId(int personId) throws Exception;
 }

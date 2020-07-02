@@ -70,7 +70,14 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 sendError();
             }
         }
-
+        else if (message instanceof PersonalMessage){
+            try {
+                sendPersonalMessage((PersonalMessage) message);
+            } catch (Exception e) {
+                log.log(Level.WARNING, "can't send personal message",e);
+                sendError();
+            }
+        }
         else if (message instanceof TransferRequestAnswer){
             if (((TransferRequestAnswer) message).request==null){
                 sendError();
@@ -211,6 +218,22 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                     deleteEvent((TransferRequestAnswer) message);
                 } catch (Exception e) {
                     log.log(Level.WARNING, "can't delete event",e);
+                    sendError();
+                }
+            }
+            else if (((TransferRequestAnswer) message).request.equals(GET_PERSONAL_MESSAGE)){
+                try {
+                    getPersonalMessage((TransferRequestAnswer) message);
+                } catch (Exception e) {
+                    log.log(Level.WARNING, "can't getPersonalMessage",e);
+                    sendError();
+                }
+            }
+            else if (((TransferRequestAnswer) message).request.equals(GET_LAST_PERSONAL_MESSAGES)){
+                try {
+                    getLastPersonalMessages((TransferRequestAnswer) message);
+                } catch (Exception e) {
+                    log.log(Level.WARNING, "can't getLastPersonalMessages",e);
                     sendError();
                 }
             }
@@ -875,6 +898,7 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                             AppContext.educareaDB.deleteGroupPersonCodeByPersonId(groupPersonId);
                             AppContext.educareaDB.deleteStudentsChatMessageByPersonId(groupPersonId);
                             AppContext.educareaDB.deleteChannelMessageByPersonId(groupPersonId);
+                            AppContext.educareaDB.deletePersonalMessageByPersonId(groupPersonId);
                             AppContext.educareaDB.deleteGroupPersonById(groupPersonId);
                             AppContext.educareaDB.commit();
                             sendAnswer(UPDATE_INFO);
@@ -1289,6 +1313,77 @@ public class MessageWorker implements Runnable, TypeRequestAnswer {
                 }else {
                     sendError();
                 }
+            }
+        }
+    }
+
+    private void sendPersonalMessage(PersonalMessage personalMessage) throws Exception {
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            GroupPerson groupPerson = AppContext.educareaDB.getGroupPersonById(personalMessage.personFrom);
+            GroupPerson personTo = AppContext.educareaDB.getGroupPersonById(personalMessage.personTo);
+            if (userId == groupPerson.userId){
+                if (groupPerson.groupId == personTo.groupId){
+                    if (LogicUtils.addPersonalMessage(personalMessage)){
+                        sendAnswer(NEW_PERSONAL_MESSAGE);
+                        LogicUtils.sendTransferToGroupPerson(new TransferRequestAnswer(NEW_PERSONAL_MESSAGE), personTo.groupPersonId);
+                        CloudMessageSender.personalMessage(personalMessage);
+                    }else {
+                        sendError();
+                    }
+                }else {
+                    sendAnswer(NO_PERMISSION);
+                }
+            }else {
+                sendAnswer(NO_PERMISSION);
+            }
+        }
+    }
+
+    private void getPersonalMessage(TransferRequestAnswer transferRequestAnswer) throws Exception {
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            int interlocutorId = Integer.parseInt(transferRequestAnswer.extra);
+            GroupPerson interlocutor = AppContext.educareaDB.getGroupPersonById(interlocutorId);
+            int groupPersonId = LogicUtils.getGroupPersonIdByUserId(userId, interlocutor.groupId);
+            GroupPerson groupPerson = AppContext.educareaDB.getGroupPersonById(groupPersonId);
+            if (groupPerson != null){
+                int count = Integer.parseInt(transferRequestAnswer.extraArr[0]);
+                List<PersonalMessage> messages = null;
+                if (transferRequestAnswer.extraArr.length>1){
+                    int lastId = Integer.parseInt(transferRequestAnswer.extraArr[1]);
+                    messages = AppContext.educareaDB.getPersonalMessagesByPersonsId(groupPerson.groupPersonId, interlocutorId, count, lastId);
+                }else {
+                    messages = AppContext.educareaDB.getPersonalMessagesByPersonsId(groupPerson.groupPersonId, interlocutorId, count);
+                }
+                sendTransfers(new PersonalMessageList(messages));
+            }else {
+                sendAnswer(NO_PERMISSION);
+            }
+        }
+    }
+
+    private void getLastPersonalMessages(TransferRequestAnswer transferRequestAnswer) throws Exception {
+        ClientInfo clientInfo = AppContext.appWebSocket.getClientInfo(webSocket);
+        int userId = checkAuthorizationGetUserId(clientInfo);
+        if (userId!=0){
+            int groupId = Integer.parseInt(transferRequestAnswer.extra);
+            int groupPersonId = LogicUtils.getGroupPersonIdByUserId(userId, groupId);
+            GroupPerson groupPerson = AppContext.educareaDB.getGroupPersonById(groupPersonId);
+            if (groupPerson != null){
+                int count = Integer.parseInt(transferRequestAnswer.extraArr[0]);
+                List<PersonalMessage> messages = null;
+                if (transferRequestAnswer.extraArr.length>1){
+                    int lastId = Integer.parseInt(transferRequestAnswer.extraArr[1]);
+                    messages = AppContext.educareaDB.getLastPersonalMessage(groupPersonId, count, lastId);
+                }else {
+                    messages = AppContext.educareaDB.getLastPersonalMessage(groupPersonId, count);
+                }
+                sendTransfers(new PersonalMessageList(messages));
+            }else {
+                sendAnswer(NO_PERMISSION);
             }
         }
     }

@@ -1057,4 +1057,138 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
             builder.build();
         }
     }
+
+    @Override
+    public void insertPersonalMessage(PersonalMessage personalMessage) throws Exception {
+        Date date = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String currentDateTime = format.format(date);
+        try(DBWorker.Builder builder = new Builder(false)
+        .setSql("INSERT INTO educarea.personal_message (person_from, person_to, text, date) VALUES (?,?,?,?)")
+        .setParameters(String.valueOf(personalMessage.personFrom), String.valueOf(personalMessage.personTo),
+                personalMessage.text, currentDateTime)
+        .setTypes("int","int","String","String")){
+            builder.build();
+        }
+    }
+
+    @Override
+    public List<PersonalMessage> getPersonalMessagesByPersonsId(int person_from, int person_to, int count) throws Exception {
+        List<PersonalMessage> messages = new ArrayList<>();
+        try(DBWorker.Builder builder = new Builder(true)
+        .setSql("SELECT * FROM educarea.personal_message WHERE ((person_from = ? AND person_to = ?) OR (person_to = ? AND person_from = ?))" +
+                " ORDER BY personal_message_id DESC LIMIT ?")
+        .setParameters(String.valueOf(person_from), String.valueOf(person_to), String.valueOf(person_from), String.valueOf(person_to), String.valueOf(count))
+        .setTypes("int","int","int","int","int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                PersonalMessage message = new PersonalMessage();
+                message.personalMessageId = resultSet.getInt(1);
+                message.personFrom = resultSet.getInt(2);
+                message.personTo = resultSet.getInt(3);
+                message.text = resultSet.getString(4);
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                format.setTimeZone(TimeZone.getTimeZone("UTC"));
+                message.date = format.parse(resultSet.getString(5));
+                messages.add(message);
+            }
+        }
+        return messages;
+    }
+
+    @Override
+    public List<PersonalMessage> getPersonalMessagesByPersonsId(int person_from, int person_to, int count, int lastId) throws Exception {
+        List<PersonalMessage> messages = new ArrayList<>();
+        try(DBWorker.Builder builder = new Builder(true)
+                .setSql("SELECT * FROM educarea.personal_message WHERE (((person_from = ? AND person_to = ?) OR (person_to = ? AND person_from = ?)) AND personal_message_id < ?)" +
+                        " ORDER BY personal_message_id DESC LIMIT ?")
+                .setParameters(String.valueOf(person_from), String.valueOf(person_to), String.valueOf(person_from),
+                        String.valueOf(person_to), String.valueOf(lastId), String.valueOf(count))
+                .setTypes("int","int","int","int","int","int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                PersonalMessage message = new PersonalMessage();
+                message.personalMessageId = resultSet.getInt(1);
+                message.personFrom = resultSet.getInt(2);
+                message.personTo = resultSet.getInt(3);
+                message.text = resultSet.getString(4);
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                format.setTimeZone(TimeZone.getTimeZone("UTC"));
+                message.date = format.parse(resultSet.getString(5));
+                messages.add(message);
+            }
+        }
+        return messages;
+    }
+
+    @Override
+    public List<PersonalMessage> getLastPersonalMessage(int groupPersonId, int count) throws Exception {
+        List<PersonalMessage> messages = new ArrayList<>();
+        try(DBWorker.Builder builder = new Builder(true)
+        .setSql("SELECT * FROM educarea.personal_message " +
+                " WHERE personal_message.personal_message_id IN (" +
+                " SELECT MAX(personal_message.personal_message_id) AS last_id " +
+                "  FROM personal_message WHERE person_to = ? OR person_from = ? " +
+                " GROUP BY IF(person_from = ?, person_to, person_from) " +
+                " ) ORDER BY personal_message.personal_message_id DESC LIMIT ?;")
+        .setParameters(String.valueOf(groupPersonId), String.valueOf(groupPersonId), String.valueOf(groupPersonId), String.valueOf(count))
+        .setTypes("int","int","int","int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                PersonalMessage message = new PersonalMessage();
+                message.personalMessageId = resultSet.getInt(1);
+                message.personFrom = resultSet.getInt(2);
+                message.personTo = resultSet.getInt(3);
+                message.text = resultSet.getString(4);
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                format.setTimeZone(TimeZone.getTimeZone("UTC"));
+                message.date = format.parse(resultSet.getString(5));
+                messages.add(message);
+            }
+        }
+        return messages;
+    }
+
+    @Override
+    public List<PersonalMessage> getLastPersonalMessage(int groupPersonId, int count, int lastId) throws Exception {
+        List<PersonalMessage> messages = new ArrayList<>();
+        try(DBWorker.Builder builder = new Builder(true)
+                .setSql("SELECT * FROM educarea.personal_message " +
+                        " WHERE personal_message.personal_message_id IN (" +
+                        " SELECT MAX(personal_message.personal_message_id) AS last_id " +
+                        "  FROM personal_message WHERE person_to = ? OR person_from = ? " +
+                        " GROUP BY IF(person_from = ?, person_to, person_from) " +
+                        " ) AND personal_message.personal_message_id < ? ORDER BY personal_message.personal_message_id DESC LIMIT ?;")
+                .setParameters(String.valueOf(groupPersonId), String.valueOf(groupPersonId), String.valueOf(groupPersonId), String.valueOf(lastId), String.valueOf(count))
+                .setTypes("int","int","int","int","int")){
+            builder.build();
+            ResultSet resultSet = builder.getResultSet();
+            while (resultSet.next()){
+                PersonalMessage message = new PersonalMessage();
+                message.personalMessageId = resultSet.getInt(1);
+                message.personFrom = resultSet.getInt(2);
+                message.personTo = resultSet.getInt(3);
+                message.text = resultSet.getString(4);
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                format.setTimeZone(TimeZone.getTimeZone("UTC"));
+                message.date = format.parse(resultSet.getString(5));
+                messages.add(message);
+            }
+        }
+        return messages;
+    }
+
+    @Override
+    public void deletePersonalMessageByPersonId(int personId) throws Exception {
+        try(DBWorker.Builder builder = new Builder(false)
+        .setSql("DELETE FROM educarea.personal_message WHERE person_from = ? and person_to = ?")
+        .setParameters(String.valueOf(personId), String.valueOf(personId))
+        .setTypes("int","int")){
+            builder.build();
+        }
+    }
 }
