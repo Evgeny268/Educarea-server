@@ -1185,7 +1185,7 @@ public class EducareaDBWorker extends DBWorker implements EducareaDB {
     @Override
     public void deletePersonalMessageByPersonId(int personId) throws Exception {
         try(DBWorker.Builder builder = new Builder(false)
-        .setSql("DELETE FROM educarea.personal_message WHERE person_from = ? and person_to = ?")
+        .setSql("DELETE FROM educarea.personal_message WHERE person_from = ? or person_to = ?")
         .setParameters(String.valueOf(personId), String.valueOf(personId))
         .setTypes("int","int")){
             builder.build();
